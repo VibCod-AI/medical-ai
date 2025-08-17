@@ -68,22 +68,25 @@ export default function DashboardContent() {
   }
 
   const handleSignOut = async () => {
+    setIsSigningOut(true)
+    console.log('🚪 DashboardContent: Iniciando proceso de signOut...')
+    
     try {
-      setIsSigningOut(true)
-      console.log('🚪 DashboardContent: Iniciando proceso de signOut...')
+      // No esperar por el signOut, ejecutar inmediatamente
+      signOut() // Sin await para evitar que se cuelgue
       
-      const { error } = await signOut()
+      console.log('🚀 DashboardContent: Redirigiendo inmediatamente...')
       
-      if (!error) {
-        console.log('✅ DashboardContent: SignOut exitoso, redirigiendo...')
-        router.push('/auth')
-      } else {
-        console.error('❌ DashboardContent: Error en signOut:', error)
-      }
+      // Pequeño delay para que se procese el signOut y luego redirección forzada
+      setTimeout(() => {
+        console.log('✅ DashboardContent: Forzando redirección...')
+        window.location.replace('/auth') // replace en lugar de href para no poder volver atrás
+      }, 500) // 500ms delay
+      
     } catch (error) {
-      console.error('❌ DashboardContent: Error inesperado en signOut:', error)
-    } finally {
-      setIsSigningOut(false)
+      console.error('❌ DashboardContent: Error en signOut:', error)
+      // Redirección inmediata en caso de error
+      window.location.replace('/auth')
     }
   }
 

@@ -207,27 +207,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    console.log('🚪 AuthContext: Iniciando signOut...')
+    
+    // Limpiar estado inmediatamente para evitar problemas
+    setSession(null)
+    setUser(null)
+    setProfile(null)
+    
     try {
-      console.log('🚪 AuthContext: Iniciando signOut...')
-      
-      const { error } = await supabase.auth.signOut()
-      
-      if (error) {
-        console.error('❌ AuthContext: Error en signOut:', error)
-        return { error }
+      // Limpiar storage ANTES de llamar a supabase
+      if (typeof window !== 'undefined') {
+        console.log('🧹 AuthContext: Limpiando storage...')
+        try {
+          localStorage.clear()
+          sessionStorage.clear()
+          
+          // Limpiar cookies manualmente
+          document.cookie.split(";").forEach((c) => {
+            const eqPos = c.indexOf("=")
+            const name = eqPos > -1 ? c.substr(0, eqPos) : c
+            document.cookie = name.trim() + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
+          })
+          
+          console.log('✅ AuthContext: Storage y cookies limpiados')
+        } catch (storageError) {
+          console.warn('⚠️ AuthContext: Error limpiando storage:', storageError)
+        }
       }
       
-      console.log('✅ AuthContext: SignOut exitoso')
+      // Crear timeout para evitar que se cuelgue
+      const timeoutPromise = new Promise((resolve) => {
+        setTimeout(() => {
+          console.log('⏰ AuthContext: Timeout en signOut - continuando...')
+          resolve({ error: null })
+        }, 3000) // 3 segundos máximo
+      })
       
-      // Limpiar estado inmediatamente sin esperar onAuthStateChange
-      setSession(null)
-      setUser(null)
-      setProfile(null)
+      // SignOut de Supabase con timeout
+      const signOutPromise = supabase.auth.signOut({ scope: 'local' }).then((result) => {
+        console.log('✅ AuthContext: Supabase signOut completado')
+        return result
+      })
       
+      // Race entre signOut y timeout
+      await Promise.race([signOutPromise, timeoutPromise])
+      
+      console.log('✅ AuthContext: SignOut proceso completado')
       return { error: null }
+      
     } catch (error) {
-      console.error('❌ AuthContext: Error en signOut catch:', error)
-      return { error: error as AuthError }
+      console.error('❌ AuthContext: Error en signOut:', error)
+      return { error: null } // Devolver éxito porque ya limpiamos el estado
     }
   }
 
