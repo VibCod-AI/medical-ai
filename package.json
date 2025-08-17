@@ -1,0 +1,60 @@
+{
+  "name": "Medical IA-nextjs",
+  "version": "1.0.0",
+  "description": "Sistema revolucionario de análisis médico en tiempo real con transcripción inteligente y análisis de IA",
+  "keywords": [
+    "medical",
+    "ai",
+    "transcription",
+    "real-time",
+    "nextjs",
+    "healthcare"
+  ],
+  "author": "Medical IA Team",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "npx tsx server.ts",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next out dist",
+    "analyze": "ANALYZE=true npm run build",
+    "export": "next export",
+    "serve": "npx serve@latest out",
+    "dev:full": "concurrently \"npm run dev\" \"cd ../backend && npm run dev\"",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "@deepgram/sdk": "^4.11.2",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.55.0",
+    "dotenv": "^17.2.1",
+    "http": "^0.0.1-security",
+    "next": "15.4.6",
+    "openai": "^5.12.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "recordrtc": "^5.6.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20.19.11",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^9.2.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.6",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.4",
+    "typescript": "^5"
+  }
+}

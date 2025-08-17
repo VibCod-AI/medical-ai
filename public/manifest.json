@@ -1,0 +1,56 @@
+{
+  "name": "Medical IA - Sistema de Consultas Médicas IA",
+  "short_name": "Medical IA",
+  "description": "Sistema revolucionario de análisis médico en tiempo real con transcripción inteligente, diarización de hablantes y análisis de IA para generar diagnósticos, recomendaciones y informes médicos completos con códigos CIE-10.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["medical", "healthcare", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard médico en desktop"
+    },
+    {
+      "src": "/screenshot-mobile.png", 
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Interface médica en móvil"
+    }
+  ],
+  "features": [
+    "audio-recording",
+    "real-time-transcription", 
+    "medical-ai-analysis",
+    "offline-capable"
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "dir": "ltr",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7"
+}
