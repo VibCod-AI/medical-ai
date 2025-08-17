@@ -1,4 +1,4 @@
-// File: /Users/habi/Documents/medical/medical-ai/src/app/auth/page.tsx
+// File: /Users/habi/Documents/medical-ai/src/app/auth/page.tsx
 import * as entry from '../../../../src/app/auth/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
