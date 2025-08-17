@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
 
 interface SignUpFormProps {
   onSwitchToLogin: () => void
@@ -23,7 +22,6 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false)
 
   const { signUp, signInWithGoogle } = useAuth()
-  const router = useRouter()
 
   // Close dropdown when clicking outside
   React.useEffect(() => {

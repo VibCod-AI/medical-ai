@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, 5000) // 5 segundos
 
     return () => clearTimeout(emergencyTimeout)
-  }, []) // Solo ejecutar una vez al inicializar
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('❌ AuthContext: Error configurando auth listener:', error)
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, fetchUserProfile])
 
   const signUp = async (email: string, password: string, userData?: Partial<UserProfile>) => {
     try {
