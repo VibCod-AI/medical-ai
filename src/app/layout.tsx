@@ -1,16 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "Medical IA - Sistema de Consultas Médicas IA",
   description: "Sistema revolucionario de análisis médico en tiempo real con transcripción inteligente, diarización de hablantes y análisis de IA para generar diagnósticos, recomendaciones y informes médicos completos con códigos CIE-10.",
   keywords: "medicina, IA, transcripción, diagnóstico, análisis médico, tiempo real, WebRTC, Deepgram, OpenAI",
   authors: [{ name: "Medical IA Team" }],
-  viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
   openGraph: {
     title: "Medical IA - Sistema de Consultas Médicas IA",

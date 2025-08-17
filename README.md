@@ -26,18 +26,32 @@
 ### 💻 **Tecnología PWA**
 - **Progressive Web App** con funcionalidad offline
 - **Interface médica profesional** responsiva
-- **Dashboard en tiempo real** con 6 paneles especializados
+- **Dashboard en tiempo real** con paneles especializados
 - **Compatible con dispositivos móviles** y escritorio
+
+### 🔐 **Autenticación y Datos**
+- **Supabase** para autenticación de usuarios
+- **Google OAuth** (opcional)
+- **Almacenamiento seguro** de sesiones médicas
+- **Historial de reportes** y análisis
 
 ## 🏗️ Arquitectura del Sistema
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   FRONTEND      │    │    BACKEND      │    │  APIs EXTERNAS  │
-│  React + TS     │◄──►│ Node.js + TS    │◄──►│ Deepgram + AI   │
-│  Audio Capture  │    │ WebSocket       │    │ Transcripción   │
-│  Medical UI     │    │ Real-time       │    │ Análisis IA     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    NEXT.JS FULLSTACK APP                   │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│   FRONTEND      │   API ROUTES    │    WEBSOCKET SERVER     │
+│  React + TS     │   Next.js API   │    Socket.io + Audio    │
+│  Audio Capture  │   RESTful APIs  │    Real-time Comms      │
+│  Medical UI     │   Route Handler │    Session Management   │
+└─────────────────┴─────────────────┴─────────────────────────┘
+           │                │                    │
+           ▼                ▼                    ▼
+    ┌─────────────┐  ┌─────────────┐    ┌─────────────┐
+    │  SUPABASE   │  │  DEEPGRAM   │    │   OPENAI    │
+    │ Auth + DB   │  │ Speech API  │    │  GPT-4 API  │
+    └─────────────┘  └─────────────┘    └─────────────┘
 ```
 
 ## 🚀 Instalación y Configuración
@@ -45,67 +59,69 @@
 ### **Prerrequisitos**
 - Node.js 18+ 
 - npm o yarn
+- Cuenta de Supabase
 - Cuenta de Deepgram
 - Cuenta de OpenAI
 
 ### **1. Clonar el repositorio**
 ```bash
-git clone https://github.com/tu-usuario/Medical IA.git
-cd Medical IA
+git clone https://github.com/tu-usuario/medical-ai.git
+cd medical-ai
 ```
 
-### **2. Configurar Backend**
+### **2. Instalar dependencias**
 ```bash
-cd backend
 npm install
-
-# Configurar variables de entorno
-cp env.example .env
-# Editar .env con tus API keys:
-# DEEPGRAM_API_KEY=tu_api_key_deepgram
-# OPENAI_API_KEY=tu_api_key_openai
 ```
 
-### **3. Configurar Frontend**
+### **3. Configurar variables de entorno**
 ```bash
-cd ../frontend
-npm install
+# Copiar el template de variables de entorno
+cp env.template .env.local
+
+# Editar .env.local con tus credenciales:
+# - Configuración de Supabase
+# - API Keys de Deepgram y OpenAI
+# - Configuración opcional de Google OAuth
 ```
 
 ### **4. Ejecutar en Desarrollo**
-
-**Terminal 1 - Backend:**
 ```bash
-cd backend
 npm run dev
-```
-
-**Terminal 2 - Frontend:**
-```bash
-cd frontend
-npm start
 ```
 
 **Acceder a:** `http://localhost:3000`
 
+### **5. Para producción**
+```bash
+npm run build
+npm start
+```
+
 ## 📱 Uso del Sistema
 
-### **1. 🔌 Verificar Conectividad**
-- Ir a la pestaña "Conectividad" 
-- Verificar conexión a backend y APIs
-- Probar micrófono
+### **1. 🔐 Autenticación**
+- Registrarse o iniciar sesión en `/auth`
+- Autenticación con email/password o Google OAuth
+- Dashboard de usuario en `/dashboard`
 
-### **2. 🎙️ Grabar Audio (Opcional)**
-- Pestaña "Grabación de Audio"
-- Probar captura y procesamiento
+### **2. 🔌 Verificar Conectividad**
+- Probar conexiones API en el dashboard
+- Verificar micrófono y permisos de audio
+- Test de Deepgram y OpenAI
 
-### **3. 🩺 Dashboard Médico**
-- **Pestaña principal** para consultas
-- **Iniciar Consulta** ▶️
-- **Hablar normalmente** - el sistema transcribe automáticamente
-- **Ver análisis en tiempo real** en los paneles
+### **3. 🩺 Consulta Médica**
+- Acceder al módulo médico en `/medical`
+- **Iniciar Nueva Sesión** ▶️
+- **Hablar normalmente** - transcripción automática en tiempo real
+- **Ver análisis médico** en paneles especializados
 - **Finalizar Consulta** ⏹️
-- **Generar Informe Final** 📋
+- **Generar Informe Final** 📋 con códigos CIE-10
+
+### **4. 📊 Historial y Reportes**
+- Ver sesiones anteriores en el dashboard
+- Descargar reportes médicos completos
+- Análisis de tendencias y seguimiento
 
 ## 🎯 Funcionalidades Avanzadas
 
@@ -146,16 +162,24 @@ npm start
 
 ## 🔧 Configuración Avanzada
 
-### **Variables de Entorno (backend/.env)**
+### **Variables de Entorno (.env.local)**
 ```env
-# Deepgram
-DEEPGRAM_API_KEY=your_deepgram_key
+# Supabase Configuration (Requerido)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
-# OpenAI
-OPENAI_API_KEY=your_openai_key
+# AI Services (Requerido)
+DEEPGRAM_API_KEY=your_deepgram_api_key
+OPENAI_API_KEY=your_openai_api_key
 
-# Servidor
-PORT=3001
+# Google OAuth (Opcional)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Server Configuration (Opcional)
+PORT=3000
+NEXT_PUBLIC_WS_URL=http://localhost:3000
 ```
 
 ### **Modelos Configurables**
@@ -166,46 +190,64 @@ PORT=3001
 ## 📦 Estructura del Proyecto
 
 ```
-Medical IA/
+medical-ai/
 ├── README.md
-├── PLAN_PROYECTO.md          # Roadmap detallado
-├── .gitignore
-├── frontend/                 # React + TypeScript PWA
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── AudioRecorder.tsx
-│   │   │   ├── ConnectionTest.tsx
-│   │   │   └── MedicalDashboard.tsx
-│   │   └── services/
-│   │       ├── audioService.ts
-│   │       └── socketService.ts
-│   └── package.json
-└── backend/                  # Node.js + TypeScript API
-    ├── src/
-    │   ├── server.ts
-    │   ├── services/
-    │   │   ├── deepgramService.ts
-    │   │   ├── openaiService.ts
-    │   │   └── audioSessionManager.ts
-    │   └── types/
-    └── package.json
+├── env.template                     # Template de variables de entorno
+├── package.json                     # Dependencias del proyecto
+├── next.config.ts                   # Configuración de Next.js
+├── server.ts                        # Servidor custom con Socket.io
+├── tsconfig.json                    # Configuración TypeScript
+├── tailwind.config.js               # Configuración Tailwind CSS
+├── public/                          # Archivos estáticos
+│   ├── manifest.json               # PWA Manifest
+│   └── *.svg                       # Iconos
+└── src/                            # Código fuente
+    ├── app/                        # App Router de Next.js
+    │   ├── layout.tsx              # Layout principal
+    │   ├── page.tsx                # Página de inicio
+    │   ├── auth/                   # Autenticación
+    │   ├── dashboard/              # Dashboard de usuario
+    │   ├── medical/                # Módulo médico principal
+    │   └── api/                    # API Routes
+    │       ├── health/             # Health check
+    │       ├── test-deepgram/      # Test Deepgram
+    │       ├── test-openai/        # Test OpenAI
+    │       ├── medical-analysis/   # Análisis médico
+    │       ├── medical-sessions/   # Sesiones médicas
+    │       ├── recordings/         # Grabaciones
+    │       └── reports-history/    # Historial reportes
+    ├── components/                 # Componentes React
+    │   ├── AudioRecorder.tsx       # Grabador de audio
+    │   ├── ConnectionTest.tsx      # Test de conectividad
+    │   ├── MedicalDashboard.tsx    # Dashboard médico
+    │   └── auth/                   # Componentes de auth
+    ├── contexts/                   # Contextos React
+    │   └── AuthContext.tsx         # Contexto de autenticación
+    ├── lib/                        # Librerías y utilidades
+    │   ├── services/               # Servicios
+    │   │   ├── deepgramService.ts  # Servicio Deepgram
+    │   │   ├── openaiService.ts    # Servicio OpenAI
+    │   │   └── audioSessionManager.ts # Gestor de sesiones
+    │   ├── supabase/               # Cliente Supabase
+    │   └── types/                  # Tipos TypeScript
+    ├── services/                   # Servicios del cliente
+    │   ├── audioService.ts         # Servicio de audio
+    │   └── socketService.ts        # Servicio WebSocket
+    └── middleware.ts               # Middleware de Next.js
 ```
 
 ## 🛠️ Scripts Disponibles
 
-### **Backend**
 ```bash
-npm run dev        # Desarrollo con nodemon
-npm run build      # Compilar TypeScript
-npm start          # Producción
-```
-
-### **Frontend**
-```bash
-npm start          # Desarrollo
-npm run build      # Build para producción
-npm test           # Tests
+npm run dev          # Desarrollo con servidor customizado
+npm run build        # Build para producción
+npm start            # Iniciar en producción
+npm run lint         # Ejecutar ESLint
+npm run lint:fix     # Arreglar errores de ESLint automáticamente
+npm run type-check   # Verificar tipos TypeScript
+npm run clean        # Limpiar archivos de build
+npm run analyze      # Analizar bundle de producción
+npm test             # Ejecutar tests (placeholder)
 ```
 
 ## 🔒 Seguridad y Privacidad
@@ -217,18 +259,36 @@ npm test           # Tests
 
 ## 🚀 Despliegue
 
-### **Frontend (Vercel/Netlify)**
+### **Vercel (Recomendado)**
 ```bash
-cd frontend
-npm run build
-# Subir carpeta build/
+# Instalar Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+
+# Configurar variables de entorno en Vercel dashboard
+# Todas las variables del env.template
 ```
 
-### **Backend (Railway/Render)**
+### **Otras plataformas (Railway/Render/Netlify)**
 ```bash
-cd backend
 npm run build
-# Configurar variables de entorno en la plataforma
+
+# Configurar variables de entorno:
+# - NEXT_PUBLIC_SUPABASE_URL
+# - NEXT_PUBLIC_SUPABASE_ANON_KEY  
+# - SUPABASE_SERVICE_ROLE_KEY
+# - DEEPGRAM_API_KEY
+# - OPENAI_API_KEY
+# - PORT (opcional)
+```
+
+### **Docker**
+```dockerfile
+# Dockerfile incluido para containerización
+docker build -t medical-ai .
+docker run -p 3000:3000 medical-ai
 ```
 
 ## 🤝 Contribución
