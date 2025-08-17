@@ -26,9 +26,10 @@ type ReportHistoryItem = {
 }
 
 export default function DashboardContent() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, signOut, loading: authLoading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [isSigningOut, setIsSigningOut] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('perfil')
   const [reportsHistory, setReportsHistory] = useState<ReportHistoryItem[]>([])
   const [loadingReports, setLoadingReports] = useState(false)
@@ -67,9 +68,22 @@ export default function DashboardContent() {
   }
 
   const handleSignOut = async () => {
-    const { error } = await signOut()
-    if (!error) {
-      router.push('/auth')
+    try {
+      setIsSigningOut(true)
+      console.log('🚪 DashboardContent: Iniciando proceso de signOut...')
+      
+      const { error } = await signOut()
+      
+      if (!error) {
+        console.log('✅ DashboardContent: SignOut exitoso, redirigiendo...')
+        router.push('/auth')
+      } else {
+        console.error('❌ DashboardContent: Error en signOut:', error)
+      }
+    } catch (error) {
+      console.error('❌ DashboardContent: Error inesperado en signOut:', error)
+    } finally {
+      setIsSigningOut(false)
     }
   }
 
@@ -120,21 +134,31 @@ export default function DashboardContent() {
           
           <button
             onClick={handleSignOut}
+            disabled={isSigningOut || authLoading}
             style={{
-              background: '#dc2626',
+              background: isSigningOut || authLoading ? '#9ca3af' : '#dc2626',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               padding: '8px 16px',
               fontSize: '14px',
               fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'background 0.2s'
+              cursor: isSigningOut || authLoading ? 'not-allowed' : 'pointer',
+              transition: 'background 0.2s',
+              opacity: isSigningOut || authLoading ? 0.7 : 1
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#b91c1c'}
-            onMouseLeave={(e) => e.currentTarget.style.background = '#dc2626'}
+            onMouseEnter={(e) => {
+              if (!isSigningOut && !authLoading) {
+                e.currentTarget.style.background = '#b91c1c'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSigningOut && !authLoading) {
+                e.currentTarget.style.background = '#dc2626'
+              }
+            }}
           >
-            Cerrar Sesión
+            {isSigningOut ? '🚪 Cerrando sesión...' : 'Cerrar Sesión'}
           </button>
         </div>
       </header>

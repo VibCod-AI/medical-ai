@@ -10,13 +10,27 @@ import { TabType } from '../../types/medical';
 
 export default function MedicalPage() {
   const [activeTab, setActiveTab] = useState<TabType>('connection');
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, loading: authLoading } = useAuth();
   const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (!error) {
-      router.push('/auth');
+    try {
+      setIsSigningOut(true)
+      console.log('🚪 MedicalPage: Iniciando proceso de signOut...')
+      
+      const { error } = await signOut();
+      
+      if (!error) {
+        console.log('✅ MedicalPage: SignOut exitoso, redirigiendo...')
+        router.push('/auth');
+      } else {
+        console.error('❌ MedicalPage: Error en signOut:', error)
+      }
+    } catch (error) {
+      console.error('❌ MedicalPage: Error inesperado en signOut:', error)
+    } finally {
+      setIsSigningOut(false)
     }
   };
 
@@ -131,21 +145,31 @@ export default function MedicalPage() {
                 
                 <button
                   onClick={handleSignOut}
+                  disabled={isSigningOut || authLoading}
                   style={{
-                    background: 'rgba(220, 38, 38, 0.8)',
+                    background: isSigningOut || authLoading ? 'rgba(156, 163, 175, 0.8)' : 'rgba(220, 38, 38, 0.8)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '8px 12px',
                     fontSize: '12px',
                     fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s'
+                    cursor: isSigningOut || authLoading ? 'not-allowed' : 'pointer',
+                    transition: 'background 0.2s',
+                    opacity: isSigningOut || authLoading ? 0.7 : 1
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(220, 38, 38, 1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(220, 38, 38, 0.8)'}
+                  onMouseEnter={(e) => {
+                    if (!isSigningOut && !authLoading) {
+                      e.currentTarget.style.background = 'rgba(220, 38, 38, 1)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSigningOut && !authLoading) {
+                      e.currentTarget.style.background = 'rgba(220, 38, 38, 0.8)'
+                    }
+                  }}
                 >
-                  🚪 Salir
+                  {isSigningOut ? '🚪 Saliendo...' : '🚪 Salir'}
                 </button>
               </div>
             </div>

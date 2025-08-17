@@ -60,6 +60,9 @@ node_modules/
 */dist/
 */build/
 
+# Next.js build output
+.next/
+
 # Audio recordings (for development)
 */recordings/
 *.wav

@@ -1,9 +1,41 @@
 import { createClient, LiveTranscriptionEvents } from '@deepgram/sdk';
 import { DeepgramConfig, TranscriptionResult } from '../types/audio';
 
+// Tipos para Deepgram que no están completamente tipados
+interface DeepgramClient {
+  listen: {
+    live: (config: Record<string, unknown>) => LiveConnection;
+  };
+}
+
+interface LiveConnection {
+  on: (event: string, callback: (...args: unknown[]) => void) => void;
+  send: (data: ArrayBuffer | Buffer) => void;
+  finish: () => void;
+  removeAllListeners: () => void;
+}
+
+interface DeepgramTranscriptionData {
+  channel?: {
+    alternatives?: Array<{
+      transcript?: string;
+      confidence?: number;
+      words?: Array<{
+        speaker?: number;
+        word?: string;
+        start?: number;
+        end?: number;
+      }>;
+    }>;
+  };
+  is_final?: boolean;
+  start?: number;
+  end?: number;
+}
+
 class DeepgramService {
-  private deepgram: unknown;
-  private connection: unknown;
+  private deepgram: DeepgramClient;
+  private connection: LiveConnection | null = null;
   private isConnected: boolean = false;
   private config: DeepgramConfig;
   private keepAliveInterval: NodeJS.Timeout | null = null;
@@ -26,7 +58,7 @@ class DeepgramService {
     };
 
     // Inicializar cliente Deepgram
-    this.deepgram = createClient(process.env.DEEPGRAM_API_KEY);
+    this.deepgram = createClient(process.env.DEEPGRAM_API_KEY) as DeepgramClient;
   }
 
   async connect(): Promise<boolean> {
@@ -45,23 +77,23 @@ class DeepgramService {
         ...(this.config.encoding && { encoding: this.config.encoding })
       };
       
-      this.connection = (this.deepgram as any).listen.live(connectionConfig);
+      this.connection = this.deepgram.listen.live(connectionConfig);
 
-      (this.connection as any).on(LiveTranscriptionEvents.Open, () => {
+      this.connection.on(LiveTranscriptionEvents.Open, () => {
         this.isConnected = true;
         this.startKeepAlive();
       });
 
-      (this.connection as any).on(LiveTranscriptionEvents.Transcript, (data: unknown) => {
+      this.connection.on(LiveTranscriptionEvents.Transcript, (data: unknown) => {
         this.handleTranscription(data);
       });
 
-      (this.connection as any).on(LiveTranscriptionEvents.Error, (error: unknown) => {
+      this.connection.on(LiveTranscriptionEvents.Error, (error: unknown) => {
         console.error('❌ Error Deepgram:', error);
         this.isConnected = false;
       });
 
-      (this.connection as any).on(LiveTranscriptionEvents.Metadata, () => {
+      this.connection.on(LiveTranscriptionEvents.Metadata, () => {
         this.isConnected = false;
         this.stopKeepAlive();
       });
@@ -103,7 +135,7 @@ class DeepgramService {
       if (this.connection && this.isConnected) {
         try {
           const silentBuffer = Buffer.alloc(1024, 0);
-          (this.connection as any).send(silentBuffer);
+          this.connection.send(silentBuffer);
         } catch (error) {
           console.error('❌ Error enviando keepalive:', error);
         }
@@ -126,7 +158,7 @@ class DeepgramService {
 
     try {
       const buffer = Buffer.from(audioBuffer);
-      (this.connection as any).send(buffer);
+      this.connection.send(buffer);
       return true;
     } catch (error) {
       console.error('❌ Error enviando audio a Deepgram:', error);
@@ -135,7 +167,7 @@ class DeepgramService {
   }
 
   private handleTranscription(data: unknown) {
-    const transcriptionData = data as Record<string, any>;
+    const transcriptionData = data as DeepgramTranscriptionData;
     if (!transcriptionData.channel?.alternatives?.[0]) {
       return;
     }
@@ -147,7 +179,13 @@ class DeepgramService {
     const transcriptionResult: TranscriptionResult = {
       transcript: result.transcript || '',
       confidence: result.confidence || 0,
-      words: result.words || [],
+      words: (result.words || []).map(word => ({
+        word: word.word || '',
+        start: word.start || 0,
+        end: word.end || 0,
+        confidence: 1.0, // Deepgram no always provide word-level confidence
+        speaker: word.speaker
+      })),
       is_final: transcriptionData.is_final || false,
       speaker: speakerNumber,
       start: transcriptionData.start,
@@ -180,14 +218,14 @@ class DeepgramService {
 
   finish(): void {
     if (this.connection && this.isConnected) {
-      (this.connection as any).finish();
+      this.connection.finish();
     }
   }
 
   disconnect(): void {
     if (this.connection) {
       this.stopKeepAlive();
-      (this.connection as any).removeAllListeners();
+      this.connection.removeAllListeners();
       this.connection = null;
       this.isConnected = false;
     }

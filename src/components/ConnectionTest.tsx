@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import socketService from '../services/socketService';
 
 interface TestResult {
@@ -14,8 +14,9 @@ const ConnectionTest: React.FC = () => {
   const [tests, setTests] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [serverStatus, setServerStatus] = useState<string>('unknown');
+  const isRunningRef = useRef(false);
 
-  const resetTests = () => {
+  const resetTests = useCallback(() => {
     setTests([
       { test: 'Backend Health', status: 'pending', message: 'Verificando...' },
       { test: 'WebSocket Connection', status: 'pending', message: 'Conectando...' },
@@ -23,7 +24,7 @@ const ConnectionTest: React.FC = () => {
       { test: 'OpenAI API', status: 'pending', message: 'Validando...' },
       { test: 'Micrófono', status: 'pending', message: 'Solicitando permisos...' }
     ]);
-  };
+  }, []);
 
   const updateTest = (testName: string, status: TestResult['status'], message: string, duration?: number) => {
     setTests(prev => prev.map(test => 
@@ -34,8 +35,9 @@ const ConnectionTest: React.FC = () => {
   };
 
   const runTests = useCallback(async () => {
-    if (isRunning) return;
+    if (isRunningRef.current) return;
     
+    isRunningRef.current = true;
     setIsRunning(true);
     resetTests();
 
@@ -88,7 +90,7 @@ const ConnectionTest: React.FC = () => {
             await socketService.testConnection();
             const duration = Date.now() - wsStart;
             updateTest('WebSocket Connection', 'success', `✅ Conectado (${socketService.isConnected ? 'Activo' : 'Inactivo'})`, duration);
-          } catch (testErr) {
+          } catch {
             updateTest('WebSocket Connection', 'error', '❌ Error en test de comunicación WebSocket');
           }
         } else {
@@ -190,14 +192,15 @@ const ConnectionTest: React.FC = () => {
       }
 
     } finally {
+      isRunningRef.current = false;
       setIsRunning(false);
     }
-  }, []); // No dependencies to prevent infinite re-renders
+  }, [resetTests]); // Include resetTests dependency
 
   // Auto-ejecutar tests al montar el componente (solo una vez)
   useEffect(() => {
     runTests();
-  }, []); // Sin dependencias para evitar bucle infinito
+  }, [runTests]);
 
   const getStatusIcon = (status: TestResult['status']) => {
     switch (status) {

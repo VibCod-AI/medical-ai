@@ -478,7 +478,20 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
   }
 
   private validateAnalysisStructure(analysis: unknown): boolean {
-    const analysisData = analysis as Record<string, any>;
+    const analysisData = analysis as {
+      symptoms?: unknown[];
+      diagnoses?: unknown[];
+      recommendations?: unknown[];
+      red_flags?: unknown[];
+      follow_up?: unknown[];
+      alternative_treatments?: unknown[];
+      emergency_criteria?: unknown[];
+      suggested_questions?: unknown[];
+      summary?: string;
+      confidence_level?: number;
+      requires_immediate_attention?: boolean;
+      [key: string]: unknown;
+    };
     return (
       analysisData &&
       Array.isArray(analysisData.symptoms) &&

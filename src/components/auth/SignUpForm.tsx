@@ -101,10 +101,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
     } else {
       setSuccess(true)
       setLoading(false)
-      // Redirect after a short delay to show success message
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 2000)
+      // No auto-redirect since user needs to confirm email first
     }
   }
 
@@ -158,14 +155,37 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
             color: '#16a34a',
             marginBottom: '16px'
           }}>
-            ¡Registro Exitoso!
+            ¡Cuenta Creada con Éxito!
           </h2>
+          <p style={{ color: '#6b7280', marginBottom: '16px' }}>
+            Te hemos enviado un correo electrónico de confirmación a <strong>{formData.email}</strong>
+          </p>
           <p style={{ color: '#6b7280', marginBottom: '24px' }}>
-            Te hemos enviado un email de confirmación. Por favor verifica tu correo para activar tu cuenta.
+            Por favor revisa tu bandeja de entrada (y la carpeta de spam) y haz clic en el enlace de confirmación para activar tu cuenta.
           </p>
-          <p style={{ color: '#6b7280', fontSize: '14px' }}>
-            Redirigiendo al dashboard...
-          </p>
+          <button
+            onClick={onSwitchToLogin}
+            style={{
+              width: '100%',
+              padding: '12px 24px',
+              backgroundColor: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#5a67d8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#667eea';
+            }}
+          >
+            Volver al Inicio de Sesión
+          </button>
         </div>
       </div>
     )

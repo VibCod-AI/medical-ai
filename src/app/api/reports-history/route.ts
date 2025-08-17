@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     }
     // Doctores y admins pueden ver todos los reportes
 
-    const { data: sessions, error, count } = await query;
+    const { data: sessions, error } = await query;
 
     if (error) {
       console.error('Error fetching reports history:', error);
