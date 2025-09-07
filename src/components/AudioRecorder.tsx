@@ -231,25 +231,27 @@ const AudioRecorder: React.FC = () => {
 
   return (
     <div style={{ 
-      padding: '20px', 
+      padding: '2rem', 
       maxWidth: '1000px', 
       margin: '0 auto',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
     }}>
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-        color: 'white',
-        padding: '24px',
-        borderRadius: '16px',
-        marginBottom: '24px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        color: '#2C2C2E',
+        padding: '2rem',
+        marginBottom: '2rem'
       }}>
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700' }}>
-          🎙️ Grabación de Audio
+        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '700', letterSpacing: '-0.5px' }}>
+          Grabación de Audio
         </h1>
-        <p style={{ margin: '8px 0 0 0', opacity: 0.9 }}>
-          Sistema de captura de audio en tiempo real para Medical IA - Next.js
+        <p style={{ margin: '0.5rem 0 0 0', color: '#6C6C70', fontSize: '1rem', fontWeight: '400' }}>
+          Sistema de captura de audio en tiempo real para Medical IA
         </p>
         
         <div style={{
@@ -295,18 +297,19 @@ const AudioRecorder: React.FC = () => {
           borderRadius: '8px',
           marginBottom: '20px'
         }}>
-          <strong>❌ Error:</strong> {error}
+          <strong>Error:</strong> {error}
         </div>
       )}
 
       {/* Controles */}
       <div style={{
-        background: 'white',
-        padding: '24px',
-        borderRadius: '12px',
-        marginBottom: '24px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        padding: '2rem',
+        marginBottom: '2rem'
       }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px' }}>
           {!isInitialized && !isRecording && (
@@ -387,7 +390,7 @@ const AudioRecorder: React.FC = () => {
             fontWeight: '600',
             color: '#374151'
           }}>
-            📊 Nivel de Audio
+            Nivel de Audio
           </h3>
           
           <canvas
@@ -428,11 +431,12 @@ const AudioRecorder: React.FC = () => {
         
         {/* Estadísticas de sesión */}
         <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-          border: '1px solid #e5e7eb'
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          borderRadius: '20px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+          padding: '1.5rem'
         }}>
           <h2 style={{ 
             margin: '0 0 16px 0', 
@@ -460,7 +464,7 @@ const AudioRecorder: React.FC = () => {
                 padding: '8px 0',
                 borderBottom: '1px solid #e5e7eb'
               }}>
-                <span>📊 Total chunks:</span>
+                <span>Total chunks:</span>
                 <span style={{ fontWeight: '600' }}>{audioStats.chunksCount}</span>
               </div>
               <div style={{ 
@@ -511,18 +515,19 @@ const AudioRecorder: React.FC = () => {
               color: '#9ca3af', 
               marginTop: '40px'
             }}>
-              📊 Las estadísticas aparecerán durante la grabación
+              Las estadísticas aparecerán durante la grabación
             </div>
           )}
         </div>
 
         {/* Información técnica */}
         <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-          border: '1px solid #e5e7eb'
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          borderRadius: '20px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+          padding: '1.5rem'
         }}>
           <h2 style={{ 
             margin: '0 0 16px 0', 
@@ -598,11 +603,12 @@ const AudioRecorder: React.FC = () => {
 
       {/* Lista de grabaciones */}
       <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        padding: '1.5rem'
       }}>
         <div style={{ 
           display: 'flex', 

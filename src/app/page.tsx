@@ -29,58 +29,92 @@ export default function HomePage() {
   // Mostrar loading mientras se verifica autenticación
   return (
     <div style={{
+      fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+      background: '#F5F5F7',
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      {/* Background decorations */}
       <div style={{
-        background: 'white',
-        padding: '40px 60px',
-        borderRadius: '20px',
+        position: 'absolute',
+        top: '20%',
+        right: '15%',
+        width: '300px',
+        height: '300px',
+        background: 'rgba(91, 156, 255, 0.1)',
+        borderRadius: '50%',
+        filter: 'blur(40px)',
+        animation: 'pulse 4s infinite'
+      }}></div>
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        left: '15%',
+        width: '400px',
+        height: '400px',
+        background: 'rgba(74, 144, 226, 0.1)',
+        borderRadius: '50%',
+        filter: 'blur(40px)',
+        animation: 'pulse 4s infinite 2s'
+      }}></div>
+
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        borderRadius: '24px',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+        padding: 'clamp(40px, 8vw, 60px)',
         textAlign: 'center',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        maxWidth: '400px',
-        width: '100%'
+        maxWidth: '500px',
+        width: '100%',
+        margin: '0 2rem',
+        position: 'relative',
+        zIndex: 10
       }}>
         <div style={{
-          width: '60px',
-          height: '60px',
-          border: '4px solid #f3f4f6',
-          borderTop: '4px solid #667eea',
+          width: '80px',
+          height: '80px',
+          border: '4px solid rgba(91, 156, 255, 0.2)',
+          borderTop: '4px solid #5B9CFF',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite',
-          margin: '0 auto 24px'
+          margin: '0 auto 2rem'
         }}></div>
         
         <h1 style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          color: 'transparent',
-          marginBottom: '8px'
+          fontSize: 'clamp(28px, 6vw, 36px)',
+          fontWeight: '700',
+          color: '#2C2C2E',
+          marginBottom: '0.5rem',
+          letterSpacing: '-0.5px'
         }}>
-          🏥 Medical IA
+          Medical AI
         </h1>
         
         <p style={{ 
-          color: '#6b7280', 
-          marginBottom: '16px',
-          fontSize: '16px'
+          color: '#6C6C70', 
+          marginBottom: '2rem',
+          fontSize: 'clamp(16px, 4vw, 18px)',
+          lineHeight: '1.5',
+          fontWeight: '400'
         }}>
           Sistema de Consultas Médicas con IA
         </p>
         
         <div style={{
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '12px',
-          fontSize: '14px',
-          color: '#64748b'
+          background: 'rgba(91, 156, 255, 0.1)',
+          border: '1px solid rgba(91, 156, 255, 0.2)',
+          borderRadius: '16px',
+          padding: '1rem 1.5rem',
+          fontSize: '15px',
+          color: '#2C2C2E',
+          fontWeight: '500',
+          backdropFilter: 'blur(10px)'
         }}>
           {loading ? 'Verificando autenticación...' : 'Redirigiendo...'}
         </div>
@@ -90,6 +124,10 @@ export default function HomePage() {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
       `}</style>
     </div>
