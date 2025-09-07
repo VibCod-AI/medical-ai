@@ -51,243 +51,286 @@ export default function MedicalPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh' }}>
-      {/* Header con navegación y usuario */}
-      <header style={{ 
-        backgroundColor: '#1f2937', 
-        padding: '20px',
-        color: 'white',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
+    <div style={{
+      fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+      background: '#F5F5F7',
+      color: '#2C2C2E',
+      minHeight: '100vh'
+    }}>
+      {/* Navigation */}
+      <nav style={{
+        position: 'fixed',
+        top: '1rem',
+        left: '2rem',
+        right: '2rem',
+        zIndex: 100,
+        padding: '0.75rem 1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'rgba(255, 255, 255, 0.15)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderRadius: '30px',
+        border: '2px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
+        transition: 'all 0.3s ease'
       }}>
-        <div style={{ 
-          maxWidth: '1400px', 
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px'
+        <div style={{
+          fontSize: '22px',
+          fontWeight: '700',
+          color: '#2C2C2E'
         }}>
-          {/* Top bar con usuario */}
+          Medical AI
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2.5rem'
+        }}>
+          <span
+            onClick={() => router.push('/dashboard')}
+            style={{ 
+              color: '#6C6C70', 
+              textDecoration: 'none', 
+              fontSize: '15px', 
+              fontWeight: '500',
+              textShadow: 'none',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#2C2C2E'
+              e.currentTarget.style.fontWeight = '600'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#6C6C70'
+              e.currentTarget.style.fontWeight = '500'
+            }}
+          >
+            Dashboard
+          </span>
+          
+          <span style={{ 
+            color: '#2C2C2E', 
+            textDecoration: 'none', 
+            fontSize: '15px', 
+            fontWeight: '700',
+            textShadow: 'none',
+          }}>
+            Consultas
+          </span>
+          
+          <a 
+            href="#reports" 
+            style={{ 
+              color: '#6C6C70', 
+              textDecoration: 'none', 
+              fontSize: '15px', 
+              fontWeight: '500',
+              textShadow: 'none',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#2C2C2E'
+              e.currentTarget.style.fontWeight = '600'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#6C6C70'
+              e.currentTarget.style.fontWeight = '500'
+            }}
+          >
+            Reportes
+          </a>
+
+          {/* User Profile Section */}
           <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '16px'
+            gap: '1rem',
+            marginLeft: '1rem',
+            paddingLeft: '1rem',
+            borderLeft: '1px solid rgba(255, 255, 255, 0.3)'
           }}>
-            <div>
-              <h1 style={{ 
-                margin: 0, 
-                fontSize: '32px', 
-                fontWeight: '700',
-                background: 'linear-gradient(135deg, #60a5fa 0%, #34d399 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>
-                🏥 Medical IA
-              </h1>
-              <p style={{ 
-                margin: '8px 0 0 0', 
-                opacity: 0.9,
-                fontSize: '18px'
-              }}>
-                Consultas Médicas con IA en Tiempo Real - Next.js
-              </p>
-            </div>
-
-            {/* Info del usuario */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              backdropFilter: 'blur(10px)'
+              color: '#2C2C2E',
+              fontSize: '14px',
+              fontWeight: '500',
+              textShadow: 'none'
             }}>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ 
-                  margin: 0, 
-                  fontWeight: '600', 
-                  fontSize: '14px' 
-                }}>
-                  {profile?.full_name || user?.email}
-                </p>
-                <p style={{ 
-                  margin: 0, 
-                  opacity: 0.8, 
-                  fontSize: '12px',
-                  textTransform: 'capitalize'
-                }}>
-                  {profile?.role || 'usuario'}
-                </p>
-              </div>
-              
-              <div style={{
-                display: 'flex',
-                gap: '8px'
-              }}>
-                <button
-                  onClick={() => router.push('/dashboard')}
-                  style={{
-                    background: 'rgba(59, 130, 246, 0.8)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.8)'}
-                >
-                  📊 Dashboard
-                </button>
-                
-                <button
-                  onClick={handleSignOut}
-                  disabled={isSigningOut || authLoading}
-                  style={{
-                    background: isSigningOut || authLoading ? 'rgba(156, 163, 175, 0.8)' : 'rgba(220, 38, 38, 0.8)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    cursor: isSigningOut || authLoading ? 'not-allowed' : 'pointer',
-                    transition: 'background 0.2s',
-                    opacity: isSigningOut || authLoading ? 0.7 : 1
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSigningOut && !authLoading) {
-                      e.currentTarget.style.background = 'rgba(220, 38, 38, 1)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSigningOut && !authLoading) {
-                      e.currentTarget.style.background = 'rgba(220, 38, 38, 0.8)'
-                    }
-                  }}
-                >
-                  {isSigningOut ? '🚪 Saliendo...' : '🚪 Salir'}
-                </button>
-              </div>
+              {profile?.full_name || user?.email || 'Usuario'}
             </div>
+            
+            <button
+              onClick={handleSignOut}
+              disabled={isSigningOut || authLoading}
+              style={{
+                background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '20px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
+              }}
+            >
+              {isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}
+            </button>
           </div>
+        </div>
+      </nav>
+      
+      {/* Main Content */}
+      <main style={{
+        position: 'relative',
+        paddingTop: '8rem', // Space for fixed navbar
+        minHeight: '100vh',
+        padding: '8rem 2rem 2rem'
+      }}>
+        {/* Tab Navigation - Modern Style */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          borderRadius: '20px',
+          padding: '2rem',
+          maxWidth: '1000px',
+          margin: '0 auto 3rem',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+        }}>
+          <h2 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: '#2C2C2E',
+            textAlign: 'center',
+            marginBottom: '2rem',
+            letterSpacing: '-0.5px'
+          }}>
+            Consultas Médicas con IA
+          </h2>
           
-          {/* Navegación por Tabs */}
           <div style={{ 
             display: 'flex', 
-            gap: '12px', 
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '2rem',
             flexWrap: 'wrap'
           }}>
             <button
               onClick={() => setActiveTab('connection')}
               style={{
-                backgroundColor: activeTab === 'connection' ? '#2563eb' : 'transparent',
-                color: 'white',
-                border: '2px solid #2563eb',
-                padding: '12px 20px',
-                borderRadius: '8px',
+                backgroundColor: activeTab === 'connection' ? '#5B9CFF' : 'transparent',
+                color: activeTab === 'connection' ? 'white' : '#6C6C70',
+                border: activeTab === 'connection' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
+                padding: '12px 24px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: activeTab === 'connection' ? '700' : '500',
+                fontSize: '15px',
+                fontWeight: '600',
                 transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                boxShadow: activeTab === 'connection' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'connection') {
+                  e.currentTarget.style.backgroundColor = 'rgba(91, 156, 255, 0.1)'
+                  e.currentTarget.style.color = '#5B9CFF'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'connection') {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#6C6C70'
+                }
               }}
             >
-              🔗 Conectividad
+              Pruebas de Conectividad
             </button>
             
             <button
               onClick={() => setActiveTab('audio')}
               style={{
-                backgroundColor: activeTab === 'audio' ? '#16a34a' : 'transparent',
-                color: 'white',
-                border: '2px solid #16a34a',
-                padding: '12px 20px',
-                borderRadius: '8px',
+                backgroundColor: activeTab === 'audio' ? '#5B9CFF' : 'transparent',
+                color: activeTab === 'audio' ? 'white' : '#6C6C70',
+                border: activeTab === 'audio' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
+                padding: '12px 24px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: activeTab === 'audio' ? '700' : '500',
+                fontSize: '15px',
+                fontWeight: '600',
                 transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                boxShadow: activeTab === 'audio' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'audio') {
+                  e.currentTarget.style.backgroundColor = 'rgba(91, 156, 255, 0.1)'
+                  e.currentTarget.style.color = '#5B9CFF'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'audio') {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#6C6C70'
+                }
               }}
             >
-              🎙️ Grabación Audio
+              Grabación y Análisis
             </button>
 
             <button
               onClick={() => setActiveTab('dashboard')}
               style={{
-                backgroundColor: activeTab === 'dashboard' ? '#7c3aed' : 'transparent',
-                color: 'white',
-                border: '2px solid #7c3aed',
-                padding: '12px 20px',
-                borderRadius: '8px',
+                backgroundColor: activeTab === 'dashboard' ? '#5B9CFF' : 'transparent',
+                color: activeTab === 'dashboard' ? 'white' : '#6C6C70',
+                border: activeTab === 'dashboard' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
+                padding: '12px 24px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: activeTab === 'dashboard' ? '700' : '500',
+                fontSize: '15px',
+                fontWeight: '600',
                 transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                boxShadow: activeTab === 'dashboard' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'dashboard') {
+                  e.currentTarget.style.backgroundColor = 'rgba(91, 156, 255, 0.1)'
+                  e.currentTarget.style.color = '#5B9CFF'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'dashboard') {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#6C6C70'
+                }
               }}
             >
-              🩺 Dashboard Médico
+              Dashboard Médico
             </button>
           </div>
         </div>
-      </header>
-      
-      {/* Contenido principal */}
-      <main style={{ 
-        background: '#f8fafc',
-        minHeight: 'calc(100vh - 140px)'
-      }}>
-        {renderTabContent()}
-      </main>
 
-      {/* Footer */}
-      <footer style={{
-        background: '#374151',
-        color: 'white',
-        padding: '20px',
-        textAlign: 'center'
-      }}>
-        <div style={{ 
-          maxWidth: '1400px', 
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
+        {/* Tab Content */}
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto'
         }}>
-          <div style={{ fontSize: '14px', opacity: 0.8 }}>
-            © 2024 Medical IA - Sistema de Consultas Médicas con IA
-          </div>
-          <div style={{ 
-            display: 'flex', 
-            gap: '16px',
-            fontSize: '14px',
-            opacity: 0.8
-          }}>
-            <span>🚀 Next.js 15</span>
-            <span>⚡ TypeScript</span>
-            <span>🎯 WebRTC</span>
-            <span>🧠 IA Médica</span>
-            <span>🔐 Supabase Auth</span>
-          </div>
+          {renderTabContent()}
         </div>
-      </footer>
+      </main>
     </div>
   );
 }
