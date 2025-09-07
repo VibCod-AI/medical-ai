@@ -358,27 +358,30 @@ const MedicalDashboard: React.FC = () => {
 
   return (
     <div style={{ 
-      padding: '20px', 
+      padding: '2rem', 
       maxWidth: '1400px', 
       margin: '0 auto',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+      background: 'transparent'
     }}>
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        padding: '24px',
-        borderRadius: '16px',
-        marginBottom: '24px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        color: '#2C2C2E',
+        padding: '2rem',
+        marginBottom: '2rem'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700' }}>
-              🏥 Dashboard Médico
+            <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '700', letterSpacing: '-0.5px' }}>
+              Dashboard Médico
             </h1>
-            <p style={{ margin: '8px 0 0 0', opacity: 0.9 }}>
-              Sistema de Análisis de Consultas en Tiempo Real - Next.js
+            <p style={{ margin: '0.5rem 0 0 0', color: '#6C6C70', fontSize: '1rem', fontWeight: '400' }}>
+              Sistema de Análisis de Consultas en Tiempo Real
             </p>
           </div>
           
@@ -417,7 +420,7 @@ const MedicalDashboard: React.FC = () => {
                   fontSize: '12px',
                   textTransform: 'capitalize'
                 }}>
-                  {profile?.role || 'usuario'} • {isConnected ? '🟢 Conectado' : '🔴 Desconectado'}
+                  {profile?.role || 'usuario'} • {isConnected ? 'Conectado' : 'Desconectado'}
                 </p>
               </div>
             </div>
@@ -427,12 +430,13 @@ const MedicalDashboard: React.FC = () => {
 
       {/* Controles */}
       <div style={{
-        background: 'white',
-        padding: '20px',
-        borderRadius: '12px',
-        marginBottom: '24px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        padding: '2rem',
+        marginBottom: '2rem'
       }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {!isRecording ? (
@@ -440,52 +444,58 @@ const MedicalDashboard: React.FC = () => {
               onClick={startSession}
               disabled={!isConnected}
               style={{
-                background: isConnected ? '#10b981' : '#9ca3af',
+                background: isConnected ? 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)' : 'rgba(108, 108, 112, 0.5)',
                 color: 'white',
                 border: 'none',
                 padding: '12px 24px',
-                borderRadius: '8px',
-                fontSize: '16px',
+                borderRadius: '20px',
+                fontSize: '15px',
                 fontWeight: '600',
                 cursor: isConnected ? 'pointer' : 'not-allowed',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                boxShadow: isConnected ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
               }}
             >
-              ▶️ Iniciar Consulta
+              Iniciar Consulta
             </button>
           ) : (
             <button
               onClick={stopSession}
               disabled={isSavingSession}
               style={{
-                background: isSavingSession ? '#9ca3af' : '#ef4444',
+                background: isSavingSession ? 'rgba(108, 108, 112, 0.5)' : 'linear-gradient(135deg, #FF6B6B 0%, #E74C3C 100%)',
                 color: 'white',
                 border: 'none',
                 padding: '12px 24px',
-                borderRadius: '8px',
-                fontSize: '16px',
+                borderRadius: '20px',
+                fontSize: '15px',
                 fontWeight: '600',
                 cursor: isSavingSession ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                boxShadow: !isSavingSession ? '0 4px 14px rgba(255, 107, 107, 0.3)' : 'none'
               }}
             >
-              {isSavingSession ? '💾 Guardando...' : '⏹️ Finalizar Consulta'}
+              {isSavingSession ? 'Guardando...' : 'Finalizar Consulta'}
             </button>
           )}
           
           <div style={{
-            padding: '8px 16px',
-            background: isRecording ? '#10b981' : '#f3f4f6',
-            color: isRecording ? 'white' : '#6b7280',
-            borderRadius: '8px',
+            padding: '12px 20px',
+            background: isRecording ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'rgba(108, 108, 112, 0.1)',
+            color: isRecording ? 'white' : '#6C6C70',
+            borderRadius: '20px',
             fontSize: '14px',
-            fontWeight: '500'
+            fontWeight: '600',
+            backdropFilter: 'blur(10px)',
+            border: isRecording ? 'none' : '1px solid rgba(108, 108, 112, 0.2)'
           }}>
-            {isRecording ? '🔴 GRABANDO' : '⚪ DETENIDO'}
+            {isRecording ? 'GRABANDO' : 'DETENIDO'}
           </div>
           
           {/* Botón Generar Informe Final */}

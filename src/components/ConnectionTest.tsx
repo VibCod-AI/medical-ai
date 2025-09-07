@@ -235,25 +235,27 @@ const ConnectionTest: React.FC = () => {
 
   return (
     <div style={{ 
-      padding: '20px', 
+      padding: '2rem', 
       maxWidth: '800px', 
       margin: '0 auto',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
     }}>
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-        color: 'white',
-        padding: '24px',
-        borderRadius: '16px',
-        marginBottom: '24px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        color: '#2C2C2E',
+        padding: '2rem',
+        marginBottom: '2rem'
       }}>
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700' }}>
-          🔗 Test de Conectividad
+        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '700', letterSpacing: '-0.5px' }}>
+          Test de Conectividad
         </h1>
-        <p style={{ margin: '8px 0 0 0', opacity: 0.9 }}>
-          Verificación completa del sistema Medical IA - Next.js
+        <p style={{ margin: '0.5rem 0 0 0', color: '#6C6C70', fontSize: '1rem', fontWeight: '400' }}>
+          Verificación completa del sistema Medical IA
         </p>
         
         {/* Estado general */}
@@ -278,26 +280,29 @@ const ConnectionTest: React.FC = () => {
 
       {/* Controles */}
       <div style={{
-        background: 'white',
-        padding: '20px',
-        borderRadius: '12px',
-        marginBottom: '24px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        padding: '2rem',
+        marginBottom: '2rem'
       }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button
             onClick={runTests}
             disabled={isRunning}
             style={{
-              background: isRunning ? '#9ca3af' : '#3b82f6',
+              background: isRunning ? 'rgba(108, 108, 112, 0.5)' : 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
               color: 'white',
               border: 'none',
               padding: '12px 24px',
-              borderRadius: '8px',
-              fontSize: '16px',
+              borderRadius: '20px',
+              fontSize: '15px',
               fontWeight: '600',
               cursor: isRunning ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: !isRunning ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none',
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
@@ -328,11 +333,12 @@ const ConnectionTest: React.FC = () => {
 
       {/* Resultados de los tests */}
       <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '24px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb'
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
+        padding: '2rem'
       }}>
         <h2 style={{ 
           margin: '0 0 20px 0', 

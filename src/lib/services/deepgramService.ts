@@ -193,17 +193,17 @@ class DeepgramService {
     };
 
     if (transcriptionResult.transcript.trim()) {
-      const status = transcriptionResult.is_final ? '✅ FINAL' : '🔄 INTERIM';
+      const status = transcriptionResult.is_final ? 'FINAL' : 'INTERIM';
       
       let speakerLabel = 'Sin identificar';
       if (transcriptionResult.speaker !== undefined) {
         const speakerMap: {[key: number]: string} = {
-          0: '👨‍⚕️ Médico',
-          1: '🧑‍🦱 Paciente',
-          2: '👥 Hablante 3',
-          3: '👥 Hablante 4'
+          0: 'Médico',
+          1: 'Paciente',
+          2: 'Hablante 3',
+          3: 'Hablante 4'
         };
-        speakerLabel = speakerMap[transcriptionResult.speaker] || `👤 Hablante ${transcriptionResult.speaker}`;
+        speakerLabel = speakerMap[transcriptionResult.speaker] || `Hablante ${transcriptionResult.speaker}`;
       }
       
       console.log(`📝 DEEPGRAM → TRANSCRIPCIÓN ${status}:`);

@@ -91,244 +91,759 @@ export default function DashboardContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-      {/* Header */}
-      <header style={{
-        background: 'white',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '16px 24px',
+    <div style={{
+      fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+      background: '#F5F5F7',
+      color: '#2C2C2E',
+      minHeight: '100vh'
+    }}>
+      {/* Navigation */}
+      <nav style={{
+        position: 'fixed',
+        top: '1rem',
+        left: '2rem',
+        right: '2rem',
+        zIndex: 100,
+        padding: '0.75rem 1.5rem',
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        background: 'rgba(255, 255, 255, 0.15)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderRadius: '30px',
+        border: '2px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
+        transition: 'all 0.3s ease'
       }}>
-        <div>
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            margin: 0
-          }}>
-            🏥 Medical IA Dashboard
-          </h1>
+        <div style={{
+          fontSize: '22px',
+          fontWeight: '700',
+          color: '#2C2C2E'
+        }}>
+          Medical AI
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ textAlign: 'right' }}>
-            <p style={{ 
-              margin: 0, 
-              fontWeight: '600', 
-              color: '#374151',
-              fontSize: '14px' 
-            }}>
-              {profile?.full_name || user?.email}
-            </p>
-            <p style={{ 
-              margin: 0, 
-              color: '#6b7280', 
-              fontSize: '12px',
-              textTransform: 'capitalize'
-            }}>
-              {profile?.role || 'usuario'}
-            </p>
-          </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2.5rem'
+        }}>
+          <span style={{ 
+            color: '#2C2C2E', 
+            textDecoration: 'none', 
+            fontSize: '15px', 
+            fontWeight: '700',
+            textShadow: 'none',
+          }}>
+            Dashboard
+          </span>
           
-          <button
-            onClick={handleSignOut}
-            disabled={isSigningOut || authLoading}
-            style={{
-              background: isSigningOut || authLoading ? '#9ca3af' : '#dc2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: isSigningOut || authLoading ? 'not-allowed' : 'pointer',
-              transition: 'background 0.2s',
-              opacity: isSigningOut || authLoading ? 0.7 : 1
+          <span
+            onClick={() => router.push('/medical')}
+            style={{ 
+              color: '#6C6C70', 
+              textDecoration: 'none', 
+              fontSize: '15px', 
+              fontWeight: '500',
+              textShadow: 'none',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer'
             }}
             onMouseEnter={(e) => {
-              if (!isSigningOut && !authLoading) {
-                e.currentTarget.style.background = '#b91c1c'
-              }
+              e.currentTarget.style.color = '#2C2C2E'
+              e.currentTarget.style.fontWeight = '600'
             }}
             onMouseLeave={(e) => {
-              if (!isSigningOut && !authLoading) {
-                e.currentTarget.style.background = '#dc2626'
-              }
+              e.currentTarget.style.color = '#6C6C70'
+              e.currentTarget.style.fontWeight = '500'
             }}
           >
-            {isSigningOut ? '🚪 Cerrando sesión...' : 'Cerrar Sesión'}
-          </button>
+            Consultas
+          </span>
+          
+          <a 
+            href="#reports" 
+            style={{ 
+              color: '#6C6C70', 
+              textDecoration: 'none', 
+              fontSize: '15px', 
+              fontWeight: '500',
+              textShadow: 'none',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#2C2C2E'
+              e.currentTarget.style.fontWeight = '600'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#6C6C70'
+              e.currentTarget.style.fontWeight = '500'
+            }}
+          >
+            Reportes
+          </a>
+
+          {/* User Profile Section */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            marginLeft: '1rem',
+            paddingLeft: '1rem',
+            borderLeft: '1px solid rgba(255, 255, 255, 0.3)'
+          }}>
+            <div style={{
+              color: '#2C2C2E',
+              fontSize: '14px',
+              fontWeight: '500',
+              textShadow: 'none'
+            }}>
+              {profile?.full_name || user?.email || 'Usuario'}
+            </div>
+            
+            <button
+              onClick={handleSignOut}
+              disabled={isSigningOut || authLoading}
+              style={{
+                background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '20px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
+              }}
+            >
+              {isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}
+            </button>
+          </div>
         </div>
-      </header>
+      </nav>
 
       {/* Main Content */}
-      <main style={{ padding: '24px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Welcome Card */}
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            marginBottom: '24px'
+      <main style={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '8rem 2rem 2rem 2rem' // Top padding for fixed navbar
+      }}>
+        {/* Hero Text */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '4rem',
+          zIndex: 10
+        }}>
+          <h1 style={{
+            fontSize: 'clamp(3rem, 8vw, 6rem)',
+            fontWeight: '800',
+            lineHeight: '1.1',
+            marginBottom: '1.5rem',
+            color: '#2C2C2E',
+            letterSpacing: '-0.02em'
           }}>
-            <h2 style={{
-              fontSize: '28px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '16px'
+            Bienvenido a tu
+            <br />
+            <span style={{
+              background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
             }}>
-              ¡Bienvenido, {profile?.full_name?.split(' ')[0] || 'Usuario'}! 👋
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '16px', marginBottom: '24px' }}>
-              Sistema de consultas médicas con IA en tiempo real. Tu cuenta está configurada como{' '}
-              <span style={{
-                color: '#667eea',
-                fontWeight: '600',
-                textTransform: 'capitalize'
-              }}>
-                {profile?.role}
-              </span>.
-            </p>
-            
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '16px'
-            }}>
-              {/* Quick Action Card */}
-              <div style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              onClick={() => router.push('/medical')}
-              >
-                <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
-                  🎙️ Iniciar Consulta
-                </h3>
-                <p style={{ fontSize: '14px', opacity: 0.9 }}>
-                  Comienza una nueva sesión médica con transcripción en tiempo real
-                </p>
-              </div>
+              Dashboard Médico
+            </span>
+          </h1>
+          <p style={{
+            fontSize: '1.375rem',
+            color: '#6C6C70',
+            maxWidth: '700px',
+            margin: '0 auto',
+            lineHeight: '1.5',
+            fontWeight: '400'
+          }}>
+            Hola, {profile?.full_name?.split(' ')[0] || 'Doctor'}. Tu asistente médico IA está listo para ayudarte con diagnósticos y consultas de pacientes.
+          </p>
+        </div>
 
-              {/* Reports History Card */}
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                padding: '24px',
-                borderRadius: '12px',
+        {/* Orb Container */}
+        <div style={{ position: 'relative', marginBottom: '3rem' }}>
+          <div className="orb-video"></div>
+          
+          {/* Search input overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{ position: 'relative', width: '350px' }}>
+              <input
+                type="text"
+                placeholder="Buscar insights médicos, síntomas, interacciones..."
+                style={{
+                  width: '100%',
+                  padding: '1rem 3rem 1rem 1.5rem',
+                  fontSize: '16px',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.8)',
+                  borderRadius: '25px',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                  outline: 'none',
+                  color: '#2C2C2E',
+                  fontFamily: '"SF Pro Display", "Inter", system-ui, sans-serif'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#5B9CFF'
+                  e.target.style.boxShadow = '0 15px 35px rgba(91, 156, 255, 0.2)'
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.8)'
+                  e.target.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <button style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                borderRadius: '50%',
+                background: '#5B9CFF',
+                border: 'none',
+                width: '36px',
+                height: '36px',
                 cursor: 'pointer',
-                transition: 'transform 0.2s'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                transition: 'all 0.2s',
+                boxShadow: '0 2px 8px rgba(91, 156, 255, 0.3)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              onClick={() => setActiveTab('historico')}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = '#4A90E2'
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = '#5B9CFF'
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1)'
+              }}
               >
-                <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#1f2937' }}>
-                  📊 Histórico de Reportes
-                </h3>
-                <p style={{ fontSize: '14px', color: '#6b7280' }}>
-                  Consulta tus reportes médicos anteriores y códigos CIE-10
-                </p>
-              </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="m5 12 7-7 7 7"/>
+                  <path d="m12 19 0-14"/>
+                </svg>
+              </button>
             </div>
           </div>
+        </div>
 
-          {/* Navigation Tabs */}
+        {/* Stats Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '2rem',
+          maxWidth: '1000px',
+          width: '100%',
+          marginBottom: '4rem'
+        }}>
           <div style={{
-            background: 'white',
-            borderRadius: '16px 16px 0 0',
-            padding: '20px 24px 0',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            marginBottom: '0'
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
           }}>
-            <div style={{ 
-              display: 'flex', 
-              gap: '8px',
-              borderBottom: '1px solid #e5e7eb'
+            <div style={{
+              fontSize: '3rem',
+              fontWeight: '700',
+              color: '#5B9CFF',
+              marginBottom: '0.5rem'
             }}>
-              <button
-                onClick={() => setActiveTab('perfil')}
-                style={{
-                  backgroundColor: activeTab === 'perfil' ? '#667eea' : 'transparent',
-                  color: activeTab === 'perfil' ? 'white' : '#6b7280',
-                  border: 'none',
-                  padding: '12px 20px',
-                  borderRadius: '8px 8px 0 0',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease',
-                  borderBottom: activeTab === 'perfil' ? '2px solid #667eea' : '2px solid transparent'
-                }}
-              >
-                👤 Mi Perfil
-              </button>
-              
-              <button
-                onClick={() => setActiveTab('historico')}
-                style={{
-                  backgroundColor: activeTab === 'historico' ? '#667eea' : 'transparent',
-                  color: activeTab === 'historico' ? 'white' : '#6b7280',
-                  border: 'none',
-                  padding: '12px 20px',
-                  borderRadius: '8px 8px 0 0',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease',
-                  borderBottom: activeTab === 'historico' ? '2px solid #667eea' : '2px solid transparent'
-                }}
-              >
-                📊 Histórico de Reportes
-              </button>
-              
-              <button
-                onClick={() => setActiveTab('configuracion')}
-                style={{
-                  backgroundColor: activeTab === 'configuracion' ? '#667eea' : 'transparent',
-                  color: activeTab === 'configuracion' ? 'white' : '#6b7280',
-                  border: 'none',
-                  padding: '12px 20px',
-                  borderRadius: '8px 8px 0 0',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  transition: 'all 0.2s ease',
-                  borderBottom: activeTab === 'configuracion' ? '2px solid #667eea' : '2px solid transparent'
-                }}
-              >
-                ⚙️ Configuración
-              </button>
+              {reportsHistory.length}
             </div>
+            <div style={{
+              color: '#6C6C70',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              lineHeight: '1.4'
+            }}>
+              Consultas médicas<br />completadas
+            </div>
+          </div>
+          
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+          }}>
+            <div style={{
+              fontSize: '3rem',
+              fontWeight: '700',
+              color: '#5B9CFF',
+              marginBottom: '0.5rem'
+            }}>
+              24/7
+            </div>
+            <div style={{
+              color: '#6C6C70',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              lineHeight: '1.4'
+            }}>
+              Asistente médico IA<br />disponibilidad
+            </div>
+          </div>
+          
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+          }}>
+            <div style={{
+              fontSize: '3rem',
+              fontWeight: '700',
+              color: '#5B9CFF',
+              marginBottom: '0.5rem'
+            }}>
+              97.3%
+            </div>
+            <div style={{
+              color: '#6C6C70',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              lineHeight: '1.4'
+            }}>
+              Precisión diagnóstica<br />del sistema
+            </div>
+          </div>
+          
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+          }}>
+            <div style={{
+              fontSize: '3rem',
+              fontWeight: '700',
+              color: '#5B9CFF',
+              marginBottom: '0.5rem'
+            }}>
+              ●
+            </div>
+            <div style={{
+              color: '#6C6C70',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              lineHeight: '1.4'
+            }}>
+              Estado del sistema<br />médico IA
+            </div>
+          </div>
+        </div>
+
+        {/* Action Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '2rem',
+          maxWidth: '1200px',
+          width: '100%',
+          marginBottom: '4rem'
+        }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-8px)'
+            e.currentTarget.style.boxShadow = '0 20px 40px rgba(91, 156, 255, 0.15)'
+            e.currentTarget.style.borderColor = 'rgba(91, 156, 255, 0.3)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.08)'
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)'
+          }}
+          onClick={() => router.push('/medical')}
+          >
+            <div style={{
+              width: '60px',
+              height: '60px',
+              background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              fontSize: '24px',
+              color: 'white',
+              boxShadow: '0 8px 16px rgba(91, 156, 255, 0.3)'
+            }}>
+              ⚕
+            </div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#2C2C2E',
+              marginBottom: '0.5rem'
+            }}>
+              Nueva Consulta
+            </h3>
+            <p style={{
+              color: '#6C6C70',
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.5'
+            }}>
+              Inicia una nueva consulta de paciente con insights médicos IA en tiempo real y recomendaciones de diagnóstico
+            </p>
+            <button style={{
+              background: '#5B9CFF',
+              color: 'white',
+              padding: '0.75rem 2rem',
+              borderRadius: '25px',
+              border: 'none',
+              fontWeight: '600',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = '#4A90E2'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = '#5B9CFF'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
+            }}
+            >
+              Iniciar Consulta Médica
+            </button>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-8px)'
+            e.currentTarget.style.boxShadow = '0 20px 40px rgba(91, 156, 255, 0.15)'
+            e.currentTarget.style.borderColor = 'rgba(91, 156, 255, 0.3)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.08)'
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)'
+          }}
+          onClick={() => setActiveTab('historico')}
+          >
+            <div style={{
+              width: '60px',
+              height: '60px',
+              background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              fontSize: '24px',
+              color: 'white',
+              boxShadow: '0 8px 16px rgba(91, 156, 255, 0.3)'
+            }}>
+              📊
+            </div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#2C2C2E',
+              marginBottom: '0.5rem'
+            }}>
+              Análisis Médicos
+            </h3>
+            <p style={{
+              color: '#6C6C70',
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.5'
+            }}>
+              Rastrea precisión diagnóstica, resultados de pacientes, alertas de interacción de medicamentos y métricas de rendimiento de IA médica
+            </p>
+            <button style={{
+              background: 'rgba(91, 156, 255, 0.1)',
+              color: '#5B9CFF',
+              padding: '0.75rem 2rem',
+              borderRadius: '25px',
+              border: '2px solid #5B9CFF',
+              fontWeight: '600',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = '#5B9CFF'
+              e.currentTarget.style.color = 'white'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(91, 156, 255, 0.1)'
+              e.currentTarget.style.color = '#5B9CFF'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+            >
+              Ver Datos Médicos
+            </button>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderRadius: '20px',
+            padding: '2rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-8px)'
+            e.currentTarget.style.boxShadow = '0 20px 40px rgba(44, 44, 46, 0.15)'
+            e.currentTarget.style.borderColor = 'rgba(44, 44, 46, 0.3)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.08)'
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)'
+          }}
+          onClick={() => setActiveTab('historico')}
+          >
+            <div style={{
+              width: '60px',
+              height: '60px',
+              background: 'linear-gradient(135deg, #2C2C2E 0%, #1C1C1E 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              fontSize: '24px',
+              color: 'white',
+              boxShadow: '0 8px 16px rgba(44, 44, 46, 0.3)'
+            }}>
+              📋
+            </div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#2C2C2E',
+              marginBottom: '0.5rem'
+            }}>
+              Registros Médicos
+            </h3>
+            <p style={{
+              color: '#6C6C70',
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.5'
+            }}>
+              Accede al historial de consultas de pacientes, reportes médicos, resúmenes diagnósticos y recomendaciones de tratamiento
+            </p>
+            <button style={{
+              background: 'rgba(44, 44, 46, 0.1)',
+              color: '#2C2C2E',
+              padding: '0.75rem 2rem',
+              borderRadius: '25px',
+              border: '2px solid #2C2C2E',
+              fontWeight: '600',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = '#2C2C2E'
+              e.currentTarget.style.color = 'white'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(44, 44, 46, 0.1)'
+              e.currentTarget.style.color = '#2C2C2E'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+            >
+              Ver Registros de Pacientes
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Tabs - Modern Style */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          borderRadius: '20px',
+          padding: '2rem',
+          maxWidth: '800px',
+          width: '100%',
+          marginBottom: '2rem',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '2rem'
+          }}>
+            <button
+              onClick={() => setActiveTab('perfil')}
+              style={{
+                backgroundColor: activeTab === 'perfil' ? '#5B9CFF' : 'transparent',
+                color: activeTab === 'perfil' ? 'white' : '#6C6C70',
+                border: activeTab === 'perfil' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
+                padding: '12px 24px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '15px',
+                fontWeight: '600',
+                transition: 'all 0.2s ease',
+                boxShadow: activeTab === 'perfil' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'perfil') {
+                  e.currentTarget.style.backgroundColor = 'rgba(91, 156, 255, 0.1)'
+                  e.currentTarget.style.color = '#5B9CFF'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'perfil') {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#6C6C70'
+                }
+              }}
+            >
+              👤 Mi Perfil
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('historico')}
+              style={{
+                backgroundColor: activeTab === 'historico' ? '#5B9CFF' : 'transparent',
+                color: activeTab === 'historico' ? 'white' : '#6C6C70',
+                border: activeTab === 'historico' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
+                padding: '12px 24px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '15px',
+                fontWeight: '600',
+                transition: 'all 0.2s ease',
+                boxShadow: activeTab === 'historico' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'historico') {
+                  e.currentTarget.style.backgroundColor = 'rgba(91, 156, 255, 0.1)'
+                  e.currentTarget.style.color = '#5B9CFF'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'historico') {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#6C6C70'
+                }
+              }}
+            >
+              📊 Histórico de Reportes
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('configuracion')}
+              style={{
+                backgroundColor: activeTab === 'configuracion' ? '#5B9CFF' : 'transparent',
+                color: activeTab === 'configuracion' ? 'white' : '#6C6C70',
+                border: activeTab === 'configuracion' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
+                padding: '12px 24px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '15px',
+                fontWeight: '600',
+                transition: 'all 0.2s ease',
+                boxShadow: activeTab === 'configuracion' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'configuracion') {
+                  e.currentTarget.style.backgroundColor = 'rgba(91, 156, 255, 0.1)'
+                  e.currentTarget.style.color = '#5B9CFF'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'configuracion') {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#6C6C70'
+                }
+              }}
+            >
+              ⚙️ Configuración
+            </button>
           </div>
 
           {/* Tab Content */}
           <div style={{
-            background: 'white',
-            borderRadius: '0 0 16px 16px',
-            padding: '24px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            minHeight: '400px'
+            minHeight: '300px'
           }}>
             {activeTab === 'perfil' && (
-              <div>
+              <div style={{ textAlign: 'center' }}>
                 <h3 style={{
-                  fontSize: '20px',
+                  fontSize: '1.5rem',
                   fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '16px'
+                  color: '#2C2C2E',
+                  marginBottom: '1.5rem'
                 }}>
                   Información de la Cuenta
                 </h3>
@@ -336,87 +851,104 @@ export default function DashboardContent() {
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                  gap: '16px'
+                  gap: '1.5rem',
+                  textAlign: 'left'
                 }}>
-                  <div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '1.5rem',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255, 255, 255, 0.8)'
+                  }}>
                     <label style={{
                       display: 'block',
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#374151',
-                      marginBottom: '4px'
+                      color: '#2C2C2E',
+                      marginBottom: '8px'
                     }}>
                       Email
                     </label>
                     <p style={{
-                      padding: '8px',
-                      background: '#f9fafb',
-                      borderRadius: '6px',
-                      color: '#6b7280',
-                      margin: 0
+                      margin: 0,
+                      color: '#6C6C70',
+                      fontSize: '15px'
                     }}>
                       {user?.email}
                     </p>
                   </div>
                   
-                  <div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '1.5rem',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255, 255, 255, 0.8)'
+                  }}>
                     <label style={{
                       display: 'block',
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#374151',
-                      marginBottom: '4px'
+                      color: '#2C2C2E',
+                      marginBottom: '8px'
                     }}>
                       Nombre Completo
                     </label>
                     <p style={{
-                      padding: '8px',
-                      background: '#f9fafb',
-                      borderRadius: '6px',
-                      color: '#6b7280',
-                      margin: 0
+                      margin: 0,
+                      color: '#6C6C70',
+                      fontSize: '15px'
                     }}>
                       {profile?.full_name || 'No especificado'}
                     </p>
                   </div>
                   
-                  <div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '1.5rem',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255, 255, 255, 0.8)'
+                  }}>
                     <label style={{
                       display: 'block',
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#374151',
-                      marginBottom: '4px'
+                      color: '#2C2C2E',
+                      marginBottom: '8px'
                     }}>
                       Teléfono
                     </label>
                     <p style={{
-                      padding: '8px',
-                      background: '#f9fafb',
-                      borderRadius: '6px',
-                      color: '#6b7280',
-                      margin: 0
+                      margin: 0,
+                      color: '#6C6C70',
+                      fontSize: '15px'
                     }}>
                       {profile?.phone || 'No especificado'}
                     </p>
                   </div>
                   
-                  <div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '1.5rem',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255, 255, 255, 0.8)'
+                  }}>
                     <label style={{
                       display: 'block',
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#374151',
-                      marginBottom: '4px'
+                      color: '#2C2C2E',
+                      marginBottom: '8px'
                     }}>
                       Tipo de Usuario
                     </label>
                     <p style={{
-                      padding: '8px',
-                      background: '#f9fafb',
-                      borderRadius: '6px',
-                      color: '#6b7280',
                       margin: 0,
+                      color: '#6C6C70',
+                      fontSize: '15px',
                       textTransform: 'capitalize'
                     }}>
                       {profile?.role || 'No especificado'}
@@ -427,17 +959,17 @@ export default function DashboardContent() {
             )}
 
             {activeTab === 'historico' && (
-              <div>
+              <div style={{ textAlign: 'center' }}>
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: '20px'
+                  marginBottom: '2rem'
                 }}>
                   <h3 style={{
-                    fontSize: '20px',
+                    fontSize: '1.5rem',
                     fontWeight: '600',
-                    color: '#1f2937',
+                    color: '#2C2C2E',
                     margin: 0
                   }}>
                     Histórico de Reportes Médicos
@@ -447,15 +979,28 @@ export default function DashboardContent() {
                     onClick={loadReportsHistory}
                     disabled={loadingReports}
                     style={{
-                      background: '#667eea',
+                      background: loadingReports ? 'rgba(91, 156, 255, 0.5)' : '#5B9CFF',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      fontSize: '14px',
+                      borderRadius: '20px',
+                      padding: '12px 24px',
+                      fontSize: '15px',
                       fontWeight: '600',
                       cursor: loadingReports ? 'not-allowed' : 'pointer',
-                      opacity: loadingReports ? 0.6 : 1
+                      transition: 'all 0.2s ease',
+                      boxShadow: loadingReports ? 'none' : '0 4px 14px rgba(91, 156, 255, 0.3)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loadingReports) {
+                        e.currentTarget.style.background = '#4A90E2'
+                        e.currentTarget.style.transform = 'translateY(-1px)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loadingReports) {
+                        e.currentTarget.style.background = '#5B9CFF'
+                        e.currentTarget.style.transform = 'translateY(0)'
+                      }
                     }}
                   >
                     {loadingReports ? '🔄 Cargando...' : '🔄 Actualizar'}
@@ -472,8 +1017,8 @@ export default function DashboardContent() {
                     <div style={{
                       width: '40px',
                       height: '40px',
-                      border: '4px solid #f3f4f6',
-                      borderTop: '4px solid #667eea',
+                      border: '4px solid rgba(91, 156, 255, 0.2)',
+                      borderTop: '4px solid #5B9CFF',
                       borderRadius: '50%',
                       animation: 'spin 1s linear infinite'
                     }}></div>
@@ -481,14 +1026,18 @@ export default function DashboardContent() {
                 ) : reportsHistory.length === 0 ? (
                   <div style={{
                     textAlign: 'center',
-                    padding: '40px',
-                    color: '#6b7280'
+                    padding: '3rem',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 255, 255, 0.8)',
+                    color: '#6C6C70'
                   }}>
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
-                    <h4 style={{ margin: '0 0 8px 0', color: '#1f2937' }}>
+                    <div style={{ fontSize: '64px', marginBottom: '1rem' }}>📊</div>
+                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#2C2C2E', fontSize: '1.25rem', fontWeight: '600' }}>
                       No hay reportes disponibles
                     </h4>
-                    <p style={{ margin: 0 }}>
+                    <p style={{ margin: 0, fontSize: '1rem' }}>
                       Los reportes médicos aparecerán aquí después de completar una consulta
                     </p>
                   </div>
@@ -669,25 +1218,29 @@ export default function DashboardContent() {
             )}
 
             {activeTab === 'configuracion' && (
-              <div>
+              <div style={{ textAlign: 'center' }}>
                 <h3 style={{
-                  fontSize: '20px',
+                  fontSize: '1.5rem',
                   fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '16px'
+                  color: '#2C2C2E',
+                  marginBottom: '2rem'
                 }}>
                   Configuración
                 </h3>
                 <div style={{
                   textAlign: 'center',
-                  padding: '40px',
-                  color: '#6b7280'
+                  padding: '3rem',
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.8)',
+                  color: '#6C6C70'
                 }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚙️</div>
-                  <h4 style={{ margin: '0 0 8px 0', color: '#1f2937' }}>
+                  <div style={{ fontSize: '64px', marginBottom: '1rem' }}>⚙️</div>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#2C2C2E', fontSize: '1.25rem', fontWeight: '600' }}>
                     Próximamente
                   </h4>
-                  <p style={{ margin: 0 }}>
+                  <p style={{ margin: 0, fontSize: '1rem' }}>
                     Funciones de configuración estarán disponibles pronto
                   </p>
                 </div>
@@ -698,6 +1251,103 @@ export default function DashboardContent() {
       </main>
 
       <style jsx>{`
+        /* Custom orb styling to match medical-ai-copy design */
+        .orb-video {
+          width: 300px;
+          height: 300px;
+          margin: 0 auto;
+          border-radius: 50%;
+          box-shadow: 0 0 50px 0 #d2ddf6, inset 0 0 30px rgba(255, 255, 255, 0.3), inset -10px -10px 20px rgba(0, 0, 0, 0.1);
+          position: relative;
+          background: radial-gradient(circle at 30% 30%, #f8fafc, #e2eaf2, #d4dde6, #c6d0da, #b8c3ce);
+          animation: jellyFloat 4s ease-in-out infinite, randomRotate 8s linear infinite;
+          overflow: hidden;
+        }
+
+        /* Added jelly-like floating animation with scale and rotation */
+        @keyframes jellyFloat {
+          0%, 100% {
+            transform: translateY(0px) scale(1) rotate(0deg);
+          }
+          25% {
+            transform: translateY(-8px) scale(1.02, 0.98) rotate(1deg);
+          }
+          50% {
+            transform: translateY(-15px) scale(0.98, 1.02) rotate(-0.5deg);
+          }
+          75% {
+            transform: translateY(-8px) scale(1.01, 0.99) rotate(0.8deg);
+          }
+        }
+
+        /* Added random rotation animation */
+        @keyframes randomRotate {
+          0% { transform: rotate(0deg); }
+          20% { transform: rotate(72deg); }
+          40% { transform: rotate(144deg); }
+          60% { transform: rotate(216deg); }
+          80% { transform: rotate(288deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        /* Added primary shine effect using ::before */
+        .orb-video::before {
+          content: "";
+          position: absolute;
+          top: 15%;
+          left: 20%;
+          width: 40%;
+          height: 40%;
+          background: radial-gradient(
+            ellipse at center,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(255, 255, 255, 0.4) 40%,
+            transparent 70%
+          );
+          border-radius: 50%;
+          animation: shineMove 3s ease-in-out infinite;
+          z-index: 1;
+        }
+
+        /* Added secondary shine effect using ::after */
+        .orb-video::after {
+          content: "";
+          position: absolute;
+          top: 60%;
+          right: 25%;
+          width: 25%;
+          height: 25%;
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 80%);
+          border-radius: 50%;
+          animation: shineMove2 4s ease-in-out infinite reverse;
+          z-index: 1;
+        }
+
+        /* Animation for primary shine movement */
+        @keyframes shineMove {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: translate(10px, -5px) scale(1.1);
+            opacity: 0.8;
+          }
+        }
+
+        /* Animation for secondary shine movement */
+        @keyframes shineMove2 {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.4;
+          }
+          50% {
+            transform: translate(-8px, 8px) scale(0.9);
+            opacity: 0.6;
+          }
+        }
+
+        /* Spin animation for loading indicators */
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
