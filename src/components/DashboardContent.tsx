@@ -68,9 +68,9 @@ export default function DashboardContent() {
   }
 
   const handleSignOut = async () => {
-    setIsSigningOut(true)
-    console.log('🚪 DashboardContent: Iniciando proceso de signOut...')
-    
+      setIsSigningOut(true)
+      console.log('🚪 DashboardContent: Iniciando proceso de signOut...')
+      
     try {
       // No esperar por el signOut, ejecutar inmediatamente
       signOut() // Sin await para evitar que se cuelgue
@@ -84,7 +84,7 @@ export default function DashboardContent() {
       }, 500) // 500ms delay
       
     } catch (error) {
-      console.error('❌ DashboardContent: Error en signOut:', error)
+        console.error('❌ DashboardContent: Error en signOut:', error)
       // Redirección inmediata en caso de error
       window.location.replace('/auth')
     }
@@ -201,37 +201,37 @@ export default function DashboardContent() {
               textShadow: 'none'
             }}>
               {profile?.full_name || user?.email || 'Usuario'}
-            </div>
-            
-            <button
-              onClick={handleSignOut}
-              disabled={isSigningOut || authLoading}
-              style={{
+          </div>
+          
+          <button
+            onClick={handleSignOut}
+            disabled={isSigningOut || authLoading}
+            style={{
                 background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
-                color: 'white',
-                border: 'none',
+              color: 'white',
+              border: 'none',
                 padding: '0.75rem 1.5rem',
                 borderRadius: '20px',
                 fontSize: '15px',
-                fontWeight: '600',
+              fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
-              }}
-              onMouseEnter={(e) => {
+            }}
+            onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
                 e.currentTarget.style.transform = 'translateY(-1px)'
                 e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
-              }}
-              onMouseLeave={(e) => {
+            }}
+            onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
               }}
             >
               {isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}
-            </button>
-          </div>
+          </button>
+        </div>
         </div>
       </nav>
 
@@ -246,7 +246,7 @@ export default function DashboardContent() {
         padding: '8rem 2rem 2rem 2rem' // Top padding for fixed navbar
       }}>
         {/* Hero Text */}
-        <div style={{
+          <div style={{
           textAlign: 'center',
           marginBottom: '4rem',
           zIndex: 10
@@ -261,7 +261,7 @@ export default function DashboardContent() {
           }}>
             Bienvenido a tu
             <br />
-            <span style={{
+              <span style={{
               background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
@@ -356,15 +356,15 @@ export default function DashboardContent() {
         </div>
 
         {/* Stats Grid */}
-        <div style={{
-          display: 'grid',
+            <div style={{
+              display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '2rem',
           maxWidth: '1000px',
           width: '100%',
           marginBottom: '4rem'
         }}>
-          <div style={{
+              <div style={{
             background: 'rgba(255, 255, 255, 0.6)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.8)',
@@ -489,7 +489,7 @@ export default function DashboardContent() {
             borderRadius: '20px',
             padding: '2rem',
             textAlign: 'center',
-            cursor: 'pointer',
+                cursor: 'pointer',
             transition: 'all 0.3s',
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
           }}
@@ -503,8 +503,8 @@ export default function DashboardContent() {
             e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.08)'
             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)'
           }}
-          onClick={() => router.push('/medical')}
-          >
+              onClick={() => router.push('/medical')}
+              >
             <div style={{
               width: '60px',
               height: '60px',
@@ -527,7 +527,7 @@ export default function DashboardContent() {
               marginBottom: '0.5rem'
             }}>
               Nueva Consulta
-            </h3>
+                </h3>
             <p style={{
               color: '#6C6C70',
               marginBottom: '1.5rem',
@@ -561,16 +561,16 @@ export default function DashboardContent() {
             >
               Iniciar Consulta Médica
             </button>
-          </div>
+              </div>
 
-          <div style={{
+              <div style={{
             background: 'rgba(255, 255, 255, 0.8)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.8)',
             borderRadius: '20px',
             padding: '2rem',
             textAlign: 'center',
-            cursor: 'pointer',
+                cursor: 'pointer',
             transition: 'all 0.3s',
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
           }}
@@ -584,8 +584,8 @@ export default function DashboardContent() {
             e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.08)'
             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)'
           }}
-          onClick={() => setActiveTab('historico')}
-          >
+              onClick={() => setActiveTab('historico')}
+              >
             <div style={{
               width: '60px',
               height: '60px',
@@ -608,7 +608,7 @@ export default function DashboardContent() {
               marginBottom: '0.5rem'
             }}>
               Análisis Médicos
-            </h3>
+                </h3>
             <p style={{
               color: '#6C6C70',
               marginBottom: '1.5rem',
@@ -641,7 +641,7 @@ export default function DashboardContent() {
             >
               Ver Datos Médicos
             </button>
-          </div>
+              </div>
 
           <div style={{
             background: 'rgba(255, 255, 255, 0.8)',
@@ -721,11 +721,11 @@ export default function DashboardContent() {
             >
               Ver Registros de Pacientes
             </button>
+            </div>
           </div>
-        </div>
 
         {/* Navigation Tabs - Modern Style */}
-        <div style={{
+          <div style={{
           background: 'rgba(255, 255, 255, 0.8)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.8)',
@@ -735,25 +735,25 @@ export default function DashboardContent() {
           width: '100%',
           marginBottom: '2rem',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)'
-        }}>
-          <div style={{ 
-            display: 'flex', 
+          }}>
+            <div style={{ 
+              display: 'flex', 
             justifyContent: 'center',
             gap: '1rem',
             marginBottom: '2rem'
-          }}>
-            <button
-              onClick={() => setActiveTab('perfil')}
-              style={{
+            }}>
+              <button
+                onClick={() => setActiveTab('perfil')}
+                style={{
                 backgroundColor: activeTab === 'perfil' ? '#5B9CFF' : 'transparent',
                 color: activeTab === 'perfil' ? 'white' : '#6C6C70',
                 border: activeTab === 'perfil' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
                 padding: '12px 24px',
                 borderRadius: '20px',
-                cursor: 'pointer',
+                  cursor: 'pointer',
                 fontSize: '15px',
-                fontWeight: '600',
-                transition: 'all 0.2s ease',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
                 boxShadow: activeTab === 'perfil' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
               }}
               onMouseEnter={(e) => {
@@ -767,23 +767,23 @@ export default function DashboardContent() {
                   e.currentTarget.style.backgroundColor = 'transparent'
                   e.currentTarget.style.color = '#6C6C70'
                 }
-              }}
-            >
-              👤 Mi Perfil
-            </button>
-            
-            <button
-              onClick={() => setActiveTab('historico')}
-              style={{
+                }}
+              >
+                👤 Mi Perfil
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('historico')}
+                style={{
                 backgroundColor: activeTab === 'historico' ? '#5B9CFF' : 'transparent',
                 color: activeTab === 'historico' ? 'white' : '#6C6C70',
                 border: activeTab === 'historico' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
                 padding: '12px 24px',
                 borderRadius: '20px',
-                cursor: 'pointer',
+                  cursor: 'pointer',
                 fontSize: '15px',
-                fontWeight: '600',
-                transition: 'all 0.2s ease',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
                 boxShadow: activeTab === 'historico' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
               }}
               onMouseEnter={(e) => {
@@ -797,23 +797,23 @@ export default function DashboardContent() {
                   e.currentTarget.style.backgroundColor = 'transparent'
                   e.currentTarget.style.color = '#6C6C70'
                 }
-              }}
-            >
-              📊 Histórico de Reportes
-            </button>
-            
-            <button
-              onClick={() => setActiveTab('configuracion')}
-              style={{
+                }}
+              >
+                📊 Histórico de Reportes
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('configuracion')}
+                style={{
                 backgroundColor: activeTab === 'configuracion' ? '#5B9CFF' : 'transparent',
                 color: activeTab === 'configuracion' ? 'white' : '#6C6C70',
                 border: activeTab === 'configuracion' ? 'none' : '1px solid rgba(108, 108, 112, 0.3)',
                 padding: '12px 24px',
                 borderRadius: '20px',
-                cursor: 'pointer',
+                  cursor: 'pointer',
                 fontSize: '15px',
-                fontWeight: '600',
-                transition: 'all 0.2s ease',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
                 boxShadow: activeTab === 'configuracion' ? '0 4px 14px rgba(91, 156, 255, 0.3)' : 'none'
               }}
               onMouseEnter={(e) => {
@@ -827,10 +827,10 @@ export default function DashboardContent() {
                   e.currentTarget.style.backgroundColor = 'transparent'
                   e.currentTarget.style.color = '#6C6C70'
                 }
-              }}
-            >
-              ⚙️ Configuración
-            </button>
+                }}
+              >
+                ⚙️ Configuración
+              </button>
           </div>
 
           {/* Tab Content */}
