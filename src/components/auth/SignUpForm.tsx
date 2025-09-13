@@ -244,7 +244,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
           Medical AI
         </span>
 
-        <h1 style={{
+          <h1 style={{
           fontSize: 'clamp(22px, 4.5vw, 26px)',
           fontWeight: '700',
           color: '#2C2C2E',
@@ -253,7 +253,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
           letterSpacing: '-0.3px'
         }}>
           Crear Cuenta
-        </h1>
+          </h1>
         <p style={{
           color: '#6C6C70',
           fontSize: 'clamp(13px, 3vw, 15px)',
@@ -262,8 +262,8 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
           margin: '0'
         }}>
           Únete a miles de médicos que ya usan Medical AI
-        </p>
-      </div>
+          </p>
+        </div>
 
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 10 }}>
@@ -445,7 +445,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              style={{
+                style={{
                 width: 'calc(100% - 32px)',
                 maxWidth: '340px',
                 padding: '13px 16px',
@@ -454,7 +454,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
                 borderRadius: '16px',
                 fontSize: '14px',
                 color: '#2C2C2E',
-                outline: 'none',
+                  outline: 'none',
                 transition: 'all 0.3s ease',
                 fontWeight: '400',
                 margin: '0 auto',
@@ -646,7 +646,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
             <div style={{
               width: '100%',
               borderTop: '1px solid rgba(0, 0, 0, 0.1)'
-            }}></div>
+          }}></div>
           </div>
           <div style={{
             position: 'relative',
@@ -661,7 +661,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
               fontWeight: '500'
             }}>
               O regístrate con
-            </span>
+          </span>
           </div>
         </div>
 
@@ -722,12 +722,12 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
             ¿Ya tienes cuenta?{' '}
           <button
             onClick={onSwitchToLogin}
-              style={{
+            style={{
                 color: '#5B9CFF',
                 fontWeight: '600',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
                 textDecoration: 'underline',
                 fontSize: '15px',
                 transition: 'color 0.2s ease'
@@ -737,9 +737,9 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
               }}
               onMouseOut={(e) => {
                 e.currentTarget.style.color = '#5B9CFF'
-              }}
-            >
-              Inicia sesión aquí
+            }}
+          >
+            Inicia sesión aquí
           </button>
           </p>
         </div>

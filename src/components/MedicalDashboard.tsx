@@ -24,8 +24,236 @@ const MedicalDashboard: React.FC = () => {
   const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
   const [isSavingReport, setIsSavingReport] = useState<boolean>(false);
   const [isReportSaved, setIsReportSaved] = useState<boolean>(false);
+  const [sessionInfo, setSessionInfo] = useState<{
+    phase: string;
+    duration: string;
+    transcriptions: number;
+    analyses: number;
+  } | null>(null);
   const transcriptionRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Cache para muestras de audio recientes (para análisis de voz)
+  const audioSamplesRef = useRef<{
+    timestamp: number;
+    audioData: Float32Array;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    features?: any;
+  }[]>([]);
+  
+  // Tracking de speakers para detectar cambios
+  const speakerTrackingRef = useRef<{
+    lastSpeaker: string | null;
+    speakerSequence: { speaker: string; timestamp: number; confidence: number }[];
+    consecutiveCount: number;
+  }>({
+    lastSpeaker: null,
+    speakerSequence: [],
+    consecutiveCount: 0
+  });
+  
+  // Estado para detección de silencio y transcripciones pendientes
+  const [pendingTranscription, setPendingTranscription] = useState<string>('');
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastAudioLevelRef = useRef<number>(0);
+  const silenceStartRef = useRef<number>(0);
+  const SILENCE_THRESHOLD = 0.01; // Umbral de silencio
+  const SILENCE_DURATION = 1500; // 1.5 segundos de silencio antes de procesar
+
+  // Función para mapear speaker usando estrategia del backend (Deepgram Diarization)
+  const mapDeepgramSpeaker = React.useCallback((speakerNumber: number | undefined, transcript: string) => {
+    console.log('🔍 Mapeando speaker con Deepgram:', { speakerNumber, transcript: transcript.substring(0, 50) + '...' });
+    
+    // Si no hay speaker number, hacer análisis de contenido básico
+    if (speakerNumber === undefined || speakerNumber === null) {
+      // Análisis de contenido simple para fallback
+      const isQuestion = /\?|cuénteme|dígame|cómo|cuándo|dónde|qué|explique|tiene|siente|presenta/i.test(transcript);
+      const isMedicalInstruction = /tome|prescribir|receta|medicamento|tratamiento|debe|voy a|le indico|recomiendo/i.test(transcript);
+      
+      if (isQuestion || isMedicalInstruction) {
+        console.log('👨‍⚕️ Fallback: Clasificado como médico por contenido');
+        return { 
+          speaker_label: 'medico', 
+          confidence: 0.7, 
+          method: 'content_analysis_fallback' 
+        };
+      } else {
+        console.log('🧑‍🦱 Fallback: Clasificado como paciente por contenido');
+        return { 
+          speaker_label: 'paciente', 
+          confidence: 0.6, 
+          method: 'content_analysis_fallback' 
+        };
+      }
+    }
+    
+    // Mapeo fijo como en el backend (igual que server.ts líneas 63-70)
+    const speakerMap: {[key: number]: 'medico' | 'paciente'} = {
+      0: 'medico',   // Speaker 0 = Médico (👨‍⚕️)
+      1: 'paciente', // Speaker 1 = Paciente (🧑‍🦱)
+      // Speakers adicionales (2, 3, etc.) se consideran pacientes
+    };
+    
+    const mappedSpeaker = speakerMap[speakerNumber] || 'paciente'; // Default a paciente para speakers adicionales
+    
+    console.log(`🎯 Speaker ${speakerNumber} → ${mappedSpeaker} (Deepgram diarization)`);
+    
+    return {
+      speaker_label: mappedSpeaker,
+      confidence: 0.9, // Alta confianza en diarización de Deepgram
+      method: 'deepgram_diarization'
+    };
+  }, []);
+
+  // Callback para capturar datos de audio del AudioService (usado en startSession)
+  const handleAudioCapture = React.useCallback((audioData: Float32Array, timestamp: number) => {
+    // Mantener solo las últimas 10 muestras para análisis
+    audioSamplesRef.current = [
+      ...audioSamplesRef.current.slice(-9),
+      { timestamp, audioData: new Float32Array(audioData) }
+    ];
+
+    // DETECTAR NIVEL DE AUDIO para determinar silencio
+    const audioLevel = Math.sqrt(audioData.reduce((sum, sample) => sum + sample * sample, 0) / audioData.length);
+    lastAudioLevelRef.current = audioLevel;
+
+    // Detectar si hay silencio o actividad de voz
+    if (audioLevel < SILENCE_THRESHOLD) {
+      // SILENCIO DETECTADO
+      if (silenceStartRef.current === 0) {
+        silenceStartRef.current = Date.now();
+        console.log('🔇 SILENCIO iniciado');
+      }
+
+      // Si hay transcripción pendiente y ha pasado suficiente tiempo de silencio
+      if (pendingTranscription && (Date.now() - silenceStartRef.current) >= SILENCE_DURATION) {
+        console.log('⏱️ SILENCIO CONFIRMADO - Procesando transcripción pendiente:', pendingTranscription.substring(0, 50));
+        
+        // Procesar la transcripción pendiente como final
+        processPendingTranscription();
+      }
+    } else {
+      // ACTIVIDAD DE VOZ DETECTADA
+      if (silenceStartRef.current > 0) {
+        console.log('🎤 VOZ DETECTADA - Silencio interrumpido');
+      }
+      silenceStartRef.current = 0; // Reset silencio
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Función para procesar transcripción pendiente cuando hay silencio
+  const processPendingTranscription = React.useCallback(() => {
+    if (!pendingTranscription.trim()) return;
+
+    console.log('🚀 PROCESANDO por SILENCIO:', pendingTranscription);
+    
+    const tempId = `${Date.now()}_${Math.random()}_silence_final`;
+    
+    // Crear transcripción final simulada
+    const finalTranscription: Transcription = {
+      id: tempId,
+      speaker: 'unknown', // Temporal, se actualizará rápidamente
+      text: pendingTranscription.trim(),
+      timestamp: new Date().toLocaleTimeString(),
+      confidence: 85, // Confianza media por detección de silencio
+      is_final: true
+    };
+
+    // AGREGAR MENSAJE FINAL INMEDIATAMENTE a la UI
+    setTranscriptions(prev => {
+      const updated = [...prev, finalTranscription];
+      console.log('✅ MENSAJE por SILENCIO AGREGADO:', pendingTranscription.substring(0, 50) + '...');
+      return updated.slice(-25); // Mantener últimas 25 transcripciones
+    });
+
+    // IDENTIFICAR SPEAKER usando mapeo de Deepgram
+    const speakerInfo = mapDeepgramSpeaker(0, pendingTranscription); // Default speaker 0 para silencio
+    console.log('🎯 Identificación por SILENCIO completada:', speakerInfo.speaker_label, `(${speakerInfo.confidence.toFixed(2)})`);
+    
+    // ACTUALIZAR la transcripción con el speaker correcto
+    setTranscriptions(prev => {
+      const updatedList = prev.map(t => {
+        if (t.id === tempId) {
+          return {
+            ...t,
+            speaker: speakerInfo.speaker_label as 'medico' | 'paciente' | 'unknown',
+            confidence: Math.round(speakerInfo.confidence * 100)
+          };
+        }
+        return t;
+      });
+      
+      console.log(`🔄 SPEAKER por SILENCIO ACTUALIZADO: ${speakerInfo.speaker_label} (${speakerInfo.method})`);
+      return updatedList;
+    });
+
+    // Limpiar transcripción pendiente
+    setPendingTranscription('');
+    silenceStartRef.current = 0;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+
+  // Función para crear un blob WAV a partir de datos PCM
+  const createWavBlob = (pcmData: Int16Array, sampleRate: number): Blob => {
+    const channels = 1;
+    const bitsPerSample = 16;
+    const bytesPerSample = bitsPerSample / 8;
+    const blockAlign = channels * bytesPerSample;
+    const byteRate = sampleRate * blockAlign;
+    const dataSize = pcmData.length * bytesPerSample;
+    const fileSize = 44 + dataSize;
+
+    const buffer = new ArrayBuffer(fileSize);
+    const view = new DataView(buffer);
+
+    // WAV header
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, fileSize - 8, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, channels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeString(36, 'data');
+    view.setUint32(40, dataSize, true);
+
+    // PCM data
+    for (let i = 0; i < pcmData.length; i++) {
+      view.setInt16(44 + i * 2, pcmData[i], true);
+    }
+
+    return new Blob([buffer], { type: 'audio/wav' });
+  };
+
+  // Función para obtener información de la sesión actual
+  const fetchSessionInfo = async () => {
+    try {
+      const response = await fetch('/api/session-info');
+      const data = await response.json();
+      
+      if (data.success && data.session_info) {
+        setSessionInfo({
+          phase: data.session_info.phase || 'listening',
+          duration: data.session_info.duration || '0 minutos',
+          transcriptions: data.session_info.transcriptions || 0,
+          analyses: data.session_info.analyses || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error obteniendo información de sesión:', error);
+    }
+  };
 
   useEffect(() => {
     // Conectar a WebSocket
@@ -39,13 +267,20 @@ const MedicalDashboard: React.FC = () => {
       }
     };
 
+
     connectSocket();
+    
+    // Obtener información inicial de sesión
+    fetchSessionInfo();
 
     // Escuchar análisis médicos
     socketService.on('medical-analysis', (...args: unknown[]) => {
       const analysis = args[0] as MedicalAnalysis;
       console.log('📊 Nuevo análisis médico recibido:', analysis);
       setCurrentAnalysis(analysis);
+      
+      // Actualizar información de sesión cuando llegue un nuevo análisis
+      fetchSessionInfo();
     });
 
     socketService.on('final-report-generated', (...args: unknown[]) => {
@@ -67,27 +302,66 @@ const MedicalDashboard: React.FC = () => {
       };
       console.log('🎧 RECIBIDO transcription-update:', transcription);
       
-      // Solo mostrar transcripciones finales para evitar spam
-      if (transcription.is_final && transcription.transcript.trim()) {
-        const newTranscription: Transcription = {
-          id: Date.now().toString() + Math.random(),
-          speaker: transcription.speaker === 0 ? 'medico' : 
-                  transcription.speaker === 1 ? 'paciente' : 'unknown',
+      // MANEJO DE TRANSCRIPCIONES: Finales + Intermedias (para detección de silencio)
+      if (transcription.transcript.trim()) {
+        if (transcription.is_final) {
+          // MENSAJE FINAL RECIBIDO de Deepgram
+          const tempId = `${Date.now()}_${Math.random()}_deepgram_final`;
+          
+          console.log('📝 MENSAJE FINAL de Deepgram:', transcription.transcript);
+          
+          // Limpiar transcripción pendiente ya que llegó una final
+          setPendingTranscription('');
+          silenceStartRef.current = 0;
+          
+          // Crear transcripción final con speaker por defecto
+          const finalTranscription: Transcription = {
+            id: tempId,
+            speaker: 'unknown', // Temporal, se actualizará rápidamente
           text: transcription.transcript,
           timestamp: new Date().toLocaleTimeString(),
-          confidence: Math.round(transcription.confidence * 100)
+          confidence: Math.round(transcription.confidence * 100),
+            is_final: true
         };
         
+          // AGREGAR MENSAJE FINAL INMEDIATAMENTE a la UI
         setTranscriptions(prev => {
-          const updated = [...prev, newTranscription];
-          console.log('📝 Actualizando transcripciones. Total:', updated.length);
-          // Mantener solo las últimas 20 transcripciones
-          return updated.slice(-20);
-        });
-        
-        console.log('📝 Nueva transcripción agregada:', newTranscription);
-      } else {
-        console.log('⏭️ Transcripción ignorada (no final o vacía)');
+            const updated = [...prev, finalTranscription];
+            console.log('✅ MENSAJE FINAL AGREGADO:', transcription.transcript.substring(0, 50) + '...');
+            return updated.slice(-25); // Mantener últimas 25 transcripciones
+          });
+
+          // IDENTIFICAR SPEAKER usando mapeo de Deepgram (directamente del transcription.speaker)
+          const speakerInfo = mapDeepgramSpeaker(transcription.speaker, transcription.transcript);
+          console.log('🎯 Identificación Deepgram completada:', speakerInfo.speaker_label, `(${speakerInfo.confidence.toFixed(2)})`);
+          
+          // ACTUALIZAR la transcripción con el speaker correcto
+          setTranscriptions(prev => {
+            const updatedList = prev.map(t => {
+              if (t.id === tempId) {
+                return {
+                  ...t,
+                  speaker: speakerInfo.speaker_label as 'medico' | 'paciente' | 'unknown',
+                  confidence: Math.round(speakerInfo.confidence * 100)
+                };
+              }
+              return t;
+            });
+            
+            console.log(`🔄 SPEAKER Deepgram ACTUALIZADO: ${speakerInfo.speaker_label} (${speakerInfo.method})`);
+            return updatedList;
+          });
+
+        } else {
+          // TRANSCRIPCIÓN INTERMEDIA - Acumular para detección de silencio
+          console.log('⏳ Intermedia ACUMULADA:', transcription.transcript.substring(0, 50) + '...');
+          
+          // Actualizar transcripción pendiente (la más reciente sobrescribe)
+          setPendingTranscription(transcription.transcript);
+          
+          // Reset timer de silencio porque hay nueva actividad de transcripción
+          silenceStartRef.current = 0;
+        }
       }
     });
 
@@ -103,7 +377,7 @@ const MedicalDashboard: React.FC = () => {
         audioService.stopRecording();
       }
     };
-  }, [isRecording]);
+  }, [isRecording, user, mapDeepgramSpeaker]);
 
   // Auto-scroll en transcripciones
   useEffect(() => {
@@ -113,6 +387,8 @@ const MedicalDashboard: React.FC = () => {
   }, [transcriptions]);
 
   const startSession = async () => {
+    // Ya no necesitamos verificar calibración - usando Deepgram diarization
+
     try {
       if (!audioService) {
         throw new Error('AudioService no disponible');
@@ -122,6 +398,12 @@ const MedicalDashboard: React.FC = () => {
       setSessionTime(0);
       setTranscriptions([]);
       setCurrentAnalysis(null);
+      setPendingTranscription(''); // Limpiar transcripción pendiente
+      silenceStartRef.current = 0; // Reset detección de silencio
+      audioSamplesRef.current = []; // Limpiar muestras anteriores
+      
+      // Configurar callback de detección de silencio ANTES de inicializar
+      audioService.setAudioDataCallback(handleAudioCapture);
       
       // Inicializar audioService
       const initialized = await audioService.initialize();
@@ -141,6 +423,7 @@ const MedicalDashboard: React.FC = () => {
       }, 1000);
 
       console.log('✅ Consulta médica iniciada con captura de audio');
+      console.log('🔇 DETECCIÓN DE SILENCIO activada - Procesará transcripciones tras', SILENCE_DURATION + 'ms de silencio');
       
     } catch (error) {
       console.error('❌ Error iniciando consulta:', error);
@@ -155,11 +438,21 @@ const MedicalDashboard: React.FC = () => {
     // Detener grabación de audio
     if (audioService) {
       audioService.stopRecording();
+      // Limpiar callback de detección de silencio
+      audioService.setAudioDataCallback(() => {});
     }
     
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+
+    // Limpiar estado de detección de silencio
+    setPendingTranscription('');
+    silenceStartRef.current = 0;
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
     }
 
     // Auto-guardar sesión si hay contenido
@@ -168,6 +461,7 @@ const MedicalDashboard: React.FC = () => {
     }
 
     console.log('⏹️ Consulta médica finalizada');
+    console.log('🔇 DETECCIÓN DE SILENCIO desactivada');
   };
 
   // Función para guardar sesión médica
@@ -358,76 +652,11 @@ const MedicalDashboard: React.FC = () => {
 
   return (
     <div style={{ 
-      padding: '2rem', 
       maxWidth: '1400px', 
       margin: '0 auto',
       fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
       background: 'transparent'
     }}>
-      {/* Header */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.8)',
-        borderRadius: '20px',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.08)',
-        color: '#2C2C2E',
-        padding: '2rem',
-        marginBottom: '2rem'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '700', letterSpacing: '-0.5px' }}>
-              Dashboard Médico
-            </h1>
-            <p style={{ margin: '0.5rem 0 0 0', color: '#6C6C70', fontSize: '1rem', fontWeight: '400' }}>
-              Sistema de Análisis de Consultas en Tiempo Real
-            </p>
-          </div>
-          
-          {/* Info del usuario */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.15)',
-            padding: '12px 20px',
-            borderRadius: '12px',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'rgba(255, 255, 255, 0.3)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px'
-              }}>
-                {profile?.role === 'doctor' ? '👨‍⚕️' : profile?.role === 'admin' ? '👤' : '🧑‍🦱'}
-              </div>
-              <div>
-                <p style={{ 
-                  margin: 0, 
-                  fontWeight: '600', 
-                  fontSize: '14px' 
-                }}>
-                  {profile?.full_name || user?.email}
-                </p>
-                <p style={{ 
-                  margin: 0, 
-                  opacity: 0.8, 
-                  fontSize: '12px',
-                  textTransform: 'capitalize'
-                }}>
-                  {profile?.role || 'usuario'} • {isConnected ? 'Conectado' : 'Desconectado'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Controles */}
       <div style={{
         background: 'rgba(255, 255, 255, 0.8)',
@@ -586,7 +815,9 @@ const MedicalDashboard: React.FC = () => {
                     padding: '12px',
                     borderRadius: '8px',
                     background: transcription.speaker === 'medico' ? '#eff6ff' : '#f0fdf4',
-                    border: `1px solid ${transcription.speaker === 'medico' ? '#dbeafe' : '#dcfce7'}`
+                    border: `1px solid ${transcription.speaker === 'medico' ? '#dbeafe' : '#dcfce7'}`,
+                    opacity: transcription.is_final === false ? 0.6 : 1, // Transcripciones intermedias más transparentes
+                    transition: 'opacity 0.2s ease'
                   }}
                 >
                   <div style={{ 
@@ -611,7 +842,8 @@ const MedicalDashboard: React.FC = () => {
                   </div>
                   <div style={{ 
                     color: '#374151',
-                    lineHeight: '1.5'
+                    lineHeight: '1.5',
+                    fontStyle: transcription.is_final === false ? 'italic' : 'normal'
                   }}>
                     {transcription.text}
                   </div>
@@ -629,17 +861,48 @@ const MedicalDashboard: React.FC = () => {
           boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
           border: '1px solid #e5e7eb'
         }}>
-          <h2 style={{ 
-            margin: '0 0 20px 0', 
-            fontSize: '20px', 
-            fontWeight: '600',
-            color: '#374151',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            🧠 Análisis Médico IA
-          </h2>
+          <div style={{ marginBottom: '20px' }}>
+            <h2 style={{ 
+              margin: '0 0 8px 0', 
+              fontSize: '20px', 
+              fontWeight: '600',
+              color: '#374151',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              🧠 Análisis Médico IA
+            </h2>
+            
+            {/* Indicador de Fase de Consulta */}
+            {currentAnalysis && (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#f0f9ff',
+                border: '1px solid #0ea5e9',
+                borderRadius: '20px',
+                padding: '4px 12px',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: '#0369a1'
+              }}>
+                <span>📋</span>
+                <span>
+                  {(() => {
+                    const phaseMap: { [key: string]: string } = {
+                      'listening': '🔇 Escuchando',
+                      'exploring': '🔍 Explorando',
+                      'differential': '🎯 Diagnóstico Diferencial',
+                      'confirmation': '✅ Confirmación'
+                    };
+                    return sessionInfo ? phaseMap[sessionInfo.phase] || 'Fase Activa' : 'Iniciando...';
+                  })()}
+                </span>
+              </div>
+            )}
+          </div>
 
           {!currentAnalysis ? (
             <div style={{ 
@@ -1266,12 +1529,12 @@ const MedicalDashboard: React.FC = () => {
                           fontSize: '12px',
                           padding: '2px 8px',
                           borderRadius: '4px',
-                          background: getPriorityColor(question.priority),
+                          background: getPriorityColor(question.priority || 'baja'),
                           color: 'white',
                           fontWeight: '500'
                         }}
                       >
-                        {question.priority.toUpperCase()}
+                        {(question.priority || 'BAJA').toUpperCase()}
                       </span>
                     </div>
 
@@ -1802,6 +2065,7 @@ const MedicalDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

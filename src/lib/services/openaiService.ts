@@ -331,6 +331,7 @@ class OpenAIService {
     }
   }
 
+  // Crear prompt médico especializado - Exactamente igual que medical-main
   private createMedicalPrompt(): string {
     const conversationText = this.conversationHistory.join('\n');
     const questionsAsked = this.doctorQuestions.join('\n- ');
@@ -406,11 +407,107 @@ INSTRUCCIONES GENERALES:
    - Si toda la información básica ya está, hacer preguntas de DESCARTE
 8. Responde ÚNICAMENTE en formato JSON válido
 
-Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
+FORMATO DE RESPUESTA REQUERIDO (JSON):
+{
+  "symptoms": [
+    {
+      "name": "nombre del síntoma",
+      "severity": "leve|moderado|severo",
+      "confidence": 0.85,
+      "mentioned_by": "medico|paciente"
+    }
+  ],
+  "diagnoses": [
+    {
+      "name": "posible diagnóstico",
+      "probability": 0.75,
+      "confidence": 0.80,
+      "supporting_symptoms": ["síntoma1", "síntoma2"],
+      "risk_level": "bajo|medio|alto|critico"
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "medicamento|examen|procedimiento|seguimiento|derivacion|lifestyle",
+      "description": "descripción detallada",
+      "priority": "baja|media|alta|urgente",
+      "reasoning": "justificación médica",
+      "timeline": "cuándo realizar (ej: inmediatamente, en 24h, próxima semana)",
+      "medication": {
+        "name": "Nombre del medicamento (comercial y genérico)",
+        "dosage": "Dosis exacta (ej: 500mg, 10ml, 2 tabletas)",
+        "frequency": "Frecuencia específica (ej: cada 8 horas, 3 veces al día)",
+        "duration": "Duración del tratamiento (ej: 7 días, 2 semanas)",
+        "route": "oral|iv|im|topica|sublingual|inhalada",
+        "instructions": "Instrucciones específicas (ej: con comida, en ayunas)",
+        "contraindications": ["Condición1", "Condición2"],
+        "side_effects": ["Efecto1", "Efecto2"],
+        "category": "analgesico|antibiotico|antiinflamatorio|antihipertensivo|otro"
+      }
+    }
+  ],
+  "red_flags": [
+    {
+      "alert": "descripción de la alerta",
+      "severity": "advertencia|critico|emergencia",
+      "action_required": "acción requerida"
+    }
+  ],
+  "follow_up": [
+    {
+      "type": "control_medico|laboratorio|imagen|especialista|autocuidado",
+      "description": "descripción del seguimiento",
+      "timeframe": "en 1 semana|en 2-3 días|en 1 mes|si no mejora",
+      "priority": "baja|media|alta|urgente",
+      "specific_instructions": "instrucciones específicas para el paciente"
+    }
+  ],
+  "alternative_treatments": [
+    {
+      "type": "terapia_fisica|nutricional|psicologica|lifestyle|complementaria",
+      "description": "descripción del tratamiento alternativo",
+      "effectiveness": "alta|media|baja",
+      "evidence_level": "alta|media|baja",
+      "instructions": "cómo implementar el tratamiento",
+      "duration": "duración esperada del tratamiento"
+    }
+  ],
+  "emergency_criteria": [
+    {
+      "symptom": "síntoma específico a vigilar",
+      "severity_threshold": "umbral específico de gravedad",
+      "time_frame": "inmediato|1-2_horas|24_horas",
+      "action": "llamar_911|ir_emergencias|contactar_medico",
+      "reasoning": "por qué este síntoma requiere atención urgente"
+    }
+  ],
+  "suggested_questions": [
+    {
+      "id": "q1",
+      "question": "¿Desde cuándo comenzó el dolor?",
+      "category": "sintoma|antecedente|examen_fisico|descarte|seguimiento",
+      "priority": "alta|media|baja",
+      "reasoning": "Esta pregunta ayuda a determinar...",
+      "target_diagnosis": "migraña"
+    }
+  ],
+  "summary": "resumen conciso de la consulta y hallazgos principales",
+  "confidence_level": 0.85,
+  "requires_immediate_attention": false
+}
+
+IMPORTANTE:
+- Responde SOLO con JSON válido, sin texto adicional
+- Usa valores numéricos entre 0 y 1 para confidence y probability
+- Solo incluye diagnósticos con probability > 0.3
+- Prioriza la seguridad del paciente en las recomendaciones
+- Si hay información insuficiente, indica baja confianza
 `;
   }
 
+  // Generar análisis médico usando OpenAI (OPTIMIZADO) - Exactamente igual que medical-main
   async generateMedicalAnalysis(): Promise<MedicalAnalysis | null> {
+    // Prevenir análisis paralelos (optimización) - Exactamente igual que medical-main
     if (this.isAnalyzing) {
       console.log('⚠️ Análisis ya en curso, saltando duplicado');
       return this.getLatestAnalysis();
@@ -420,13 +517,13 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
     
     try {
       if (this.conversationHistory.length < 2) {
-        return null;
+        return null; // Necesita al menos 2 intervenciones para analizar
       }
 
       const prompt = this.createMedicalPrompt();
 
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4-turbo-preview', // Modelo más avanzado para análisis médico
         messages: [
           {
             role: 'system',
@@ -437,9 +534,9 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
             content: prompt
           }
         ],
-        temperature: 0.3,
+        temperature: 0.3, // Baja temperatura para respuestas más consistentes
         max_tokens: 2000,
-        response_format: { type: 'json_object' }
+        response_format: { type: 'json_object' } // Forzar respuesta JSON
       });
 
       const analysisText = response.choices[0]?.message?.content;
@@ -447,21 +544,33 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
         throw new Error('No se recibió respuesta de OpenAI');
       }
 
+      // Parsear la respuesta JSON
       const analysis: MedicalAnalysis = JSON.parse(analysisText);
       
+      // Validar que tiene la estructura esperada
       if (!this.validateAnalysisStructure(analysis)) {
         throw new Error('Estructura de análisis inválida');
       }
 
+      // Agregar al historial
       this.analysisHistory.push(analysis);
 
       console.log('🧠 OPENAI → ANÁLISIS MÉDICO COMPLETO:');
       console.log(`   📋 Síntomas detectados: ${analysis.symptoms.length}`);
       console.log(`   🔍 Diagnósticos sugeridos: ${analysis.diagnoses.length}`);
       console.log(`   💡 Recomendaciones: ${analysis.recommendations.length}`);
-      console.log(`   🎯 Confianza general: ${Math.round(analysis.confidence_level * 100)}%`);
+      console.log(`   📅 Seguimiento: ${analysis.follow_up.length}`);
+      console.log(`   🌿 Tratamientos alternativos: ${analysis.alternative_treatments.length}`);
+      console.log(`   🚨 Criterios de emergencia: ${analysis.emergency_criteria.length}`);
+      console.log(`   ❓ Preguntas sugeridas: ${analysis.suggested_questions.length}`);
+      console.log(`   🎯 Información extraída: ${Object.keys(this.extractedInfo).filter(key => {
+        const value = this.extractedInfo[key as keyof ExtractedInformation];
+        return Array.isArray(value) ? value.length > 0 : value === true;
+      }).length} elementos`);
       
       this.lastQuestionUpdate = Date.now();
+      console.log(`   ⚠️ Red flags: ${analysis.red_flags.length}`);
+      console.log(`   🎯 Confianza general: ${Math.round(analysis.confidence_level * 100)}%`);
       
       if (analysis.requires_immediate_attention) {
         console.log('🚨 ¡ATENCIÓN INMEDIATA REQUERIDA!');
@@ -473,39 +582,98 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
       console.error('❌ Error generando análisis médico:', error);
       return null;
     } finally {
+      // Liberar el lock de análisis
       this.isAnalyzing = false;
     }
   }
 
-  private validateAnalysisStructure(analysis: unknown): boolean {
-    const analysisData = analysis as {
-      symptoms?: unknown[];
-      diagnoses?: unknown[];
-      recommendations?: unknown[];
-      red_flags?: unknown[];
-      follow_up?: unknown[];
-      alternative_treatments?: unknown[];
-      emergency_criteria?: unknown[];
-      suggested_questions?: unknown[];
-      summary?: string;
-      confidence_level?: number;
-      requires_immediate_attention?: boolean;
-      [key: string]: unknown;
-    };
+  // Validar estructura del análisis - Exactamente igual que medical-main
+  private validateAnalysisStructure(analysis: any): boolean {
     return (
-      analysisData &&
-      Array.isArray(analysisData.symptoms) &&
-      Array.isArray(analysisData.diagnoses) &&
-      Array.isArray(analysisData.recommendations) &&
-      Array.isArray(analysisData.red_flags) &&
-      Array.isArray(analysisData.follow_up) &&
-      Array.isArray(analysisData.alternative_treatments) &&
-      Array.isArray(analysisData.emergency_criteria) &&
-      Array.isArray(analysisData.suggested_questions) &&
-      typeof analysisData.summary === 'string' &&
-      typeof analysisData.confidence_level === 'number' &&
-      typeof analysisData.requires_immediate_attention === 'boolean'
+      analysis &&
+      Array.isArray(analysis.symptoms) &&
+      Array.isArray(analysis.diagnoses) &&
+      Array.isArray(analysis.recommendations) &&
+      Array.isArray(analysis.red_flags) &&
+      Array.isArray(analysis.follow_up) &&
+      Array.isArray(analysis.alternative_treatments) &&
+      Array.isArray(analysis.emergency_criteria) &&
+      Array.isArray(analysis.suggested_questions) &&
+      typeof analysis.summary === 'string' &&
+      typeof analysis.confidence_level === 'number' &&
+      typeof analysis.requires_immediate_attention === 'boolean'
     );
+  }
+
+  private sanitizeAnalysisStructure(analysis: unknown): MedicalAnalysis | null {
+    try {
+      console.log('🔧 Sanitizando estructura de análisis...');
+      
+      // Cast to any for property access
+      const analysisData = analysis as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      
+      // Crear estructura base con valores por defecto
+      const sanitized: MedicalAnalysis = {
+        symptoms: this.ensureArray(analysisData.symptoms, 'symptoms'),
+        diagnoses: this.ensureArray(analysisData.diagnoses, 'diagnoses'),
+        recommendations: this.ensureArray(analysisData.recommendations, 'recommendations'),
+        red_flags: this.ensureArray(analysisData.red_flags, 'red_flags'),
+        follow_up: this.ensureArray(analysisData.follow_up, 'follow_up'),
+        alternative_treatments: this.ensureArray(analysisData.alternative_treatments, 'alternative_treatments'),
+        emergency_criteria: this.ensureArray(analysisData.emergency_criteria, 'emergency_criteria'),
+        suggested_questions: this.ensureArray(analysisData.suggested_questions, 'suggested_questions'),
+        summary: typeof analysisData.summary === 'string' && analysisData.summary.trim() 
+          ? analysisData.summary.trim() 
+          : 'Análisis médico generado automáticamente.',
+        confidence_level: typeof analysisData.confidence_level === 'number' && 
+          analysisData.confidence_level >= 0 && analysisData.confidence_level <= 1
+          ? analysisData.confidence_level 
+          : 0.5,
+        requires_immediate_attention: typeof analysisData.requires_immediate_attention === 'boolean' 
+          ? analysisData.requires_immediate_attention 
+          : false,
+        timestamp: new Date().toISOString(),
+        session_id: this.sessionId
+      };
+      
+      console.log('🔧 Estructura sanitizada:', {
+        symptoms: sanitized.symptoms.length,
+        diagnoses: sanitized.diagnoses.length,
+        recommendations: sanitized.recommendations.length,
+        confidence: sanitized.confidence_level
+      });
+      
+      return sanitized;
+    } catch (error) {
+      console.error('❌ Error sanitizando análisis:', error);
+      return null;
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private ensureArray(value: unknown, fieldName: string): any[] {
+    if (Array.isArray(value)) {
+      console.log(`✅ ${fieldName} es array válido: ${value.length} elementos`);
+      return value;
+    }
+    
+    if (typeof value === 'string' && value.trim()) {
+      // Intentar convertir string a array si es JSON válido
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+          console.log(`🔧 ${fieldName} convertido de string a array: ${parsed.length} elementos`);
+          return parsed;
+        }
+      } catch {
+        // Si no es JSON válido, crear array con el string
+        console.log(`🔧 ${fieldName} convertido a array de 1 elemento`);
+        return [value];
+      }
+    }
+    
+    console.warn(`⚠️ ${fieldName} no válido, usando array vacío. Valor:`, value);
+    return [];
   }
 
   getLatestAnalysis(): MedicalAnalysis | null {

@@ -23,39 +23,41 @@ const initServices = () => {
     deepgramService = new DeepgramService();
     openaiService = new OpenAIService();
     
-    // Configurar callback de Deepgram
+    // Configurar integración Deepgram → OpenAI (OPTIMIZADO PARA VELOCIDAD) - Exactamente igual que medical-main
     deepgramService.onTranscriptionReceived = async (transcriptionResult) => {
-      console.log('📝 Transcripción recibida:', transcriptionResult.transcript);
-      
+      // 🚀 PASO 1: FRONTEND INMEDIATO (sin esperar nada) - Exactamente igual que medical-main
       if (transcriptionResult.transcript.trim()) {
         const transcriptionData = {
-          is_final: transcriptionResult.is_final,
           transcript: transcriptionResult.transcript,
           speaker: transcriptionResult.speaker,
-          confidence: transcriptionResult.confidence
+          confidence: transcriptionResult.confidence,
+          is_final: transcriptionResult.is_final,
+          timestamp: new Date().toISOString()
         };
         
-        // Enviar transcripción a todos los clientes
+        // Envío INMEDIATO sin await - Exactamente igual que medical-main
         if (io) {
           io.emit('transcription-update', transcriptionData);
         }
+      }
+
+      // 🚀 PASO 2: PROCESAMIENTO PARALELO (solo transcripciones finales) - Exactamente igual que medical-main
+      if (transcriptionResult.is_final && transcriptionResult.transcript.trim()) {
         
-        if (transcriptionResult.is_final && transcriptionResult.transcript.trim()) {
-          let speakerLabel = 'Sin identificar';
+        // Determinar speaker label (RÁPIDO - sin I/O) - Exactamente igual que medical-main
+        let speakerLabel = 'Sin identificar';
+        if (transcriptionResult.speaker !== undefined) {
           const speakerMap: {[key: number]: string} = {
             0: 'Médico',
-            1: 'Paciente', 
+            1: 'Paciente',
             2: 'Hablante 3',
             3: 'Hablante 4'
           };
-          
-          if (typeof transcriptionResult.speaker === 'number') {
-            speakerLabel = speakerMap[transcriptionResult.speaker] || `Hablante ${transcriptionResult.speaker}`;
-          }
-          
-          // Procesar transcripción final
-          processTranscriptionAsync(transcriptionResult, speakerLabel);
+          speakerLabel = speakerMap[transcriptionResult.speaker] || `Hablante ${transcriptionResult.speaker}`;
         }
+        
+        // 🚀 PARALELO: Cache + Análisis (NO BLOQUEAR) - Exactamente igual que medical-main
+        processTranscriptionAsync(transcriptionResult, speakerLabel);
       }
     };
     
@@ -67,6 +69,7 @@ const initServices = () => {
   }
 };
 
+// 🚀 FUNCIÓN ASÍNCRONA PARALELA (NO BLOQUEA EL FLUJO PRINCIPAL) - Exactamente igual que medical-main
 const processTranscriptionAsync = async (transcriptionResult: any, speakerLabel: string) => {
   try {
     if (!openaiService) {
@@ -74,20 +77,51 @@ const processTranscriptionAsync = async (transcriptionResult: any, speakerLabel:
       return;
     }
     
-    // Agregar transcripción al historial
+    // Cache RÁPIDO (local, sin I/O) - Agregar transcripción al historial
     openaiService.addTranscription(transcriptionResult, speakerLabel);
     
-            // Generar análisis médico
-        const analysis = await openaiService.generateMedicalAnalysis();
-        
-        if (analysis) {
-          console.log('🧠 Análisis médico generado:', analysis.symptoms?.length || 0, 'síntomas');
-          if (io) {
-            io.emit('medical-analysis', analysis);
-          }
+    // Evaluación de reglas RÁPIDA (local) - Exactamente igual que medical-main
+    const stats = openaiService.getStats();
+    let shouldAnalyze = false;
+    let analysisReason = '';
+    
+    // Regla 1: Después de primera información del paciente
+    if (stats.transcriptions_processed === 1 && speakerLabel === 'Paciente') {
+      shouldAnalyze = true;
+      analysisReason = 'primera información del paciente';
+    }
+    
+    // Regla 2: Cada 2 transcripciones finales (normal)
+    else if (stats.transcriptions_processed >= 2 && 
+             stats.transcriptions_processed % 2 === 0) {
+      shouldAnalyze = true;
+      analysisReason = 'frecuencia regular (cada 2 transcripciones)';
+    }
+    
+    // Regla 3: Después de respuesta del paciente a pregunta del médico
+    else if (speakerLabel === 'Paciente' && 
+             stats.doctor_questions_detected > 0 && 
+             stats.transcriptions_processed > 1) {
+      shouldAnalyze = true;
+      analysisReason = 'respuesta del paciente a pregunta médica';
+    }
+    
+    // 🚀 ANÁLISIS OPENAI (PARALELO - no bloquea frontend) - Exactamente igual que medical-main
+    if (shouldAnalyze) {
+      console.log(`🧠 Generando análisis PARALELO: ${analysisReason}`);
+      
+      // Esta llamada es lenta pero NO BLOQUEA el frontend
+      const analysis = await openaiService.generateMedicalAnalysis();
+      
+      if (analysis) {
+        if (io) {
+          io.emit('medical-analysis', analysis);
         }
+        console.log('📤 Análisis enviado (procesamiento paralelo completado)');
+      }
+    }
   } catch (error) {
-    console.error('❌ Error procesando transcripción:', error);
+    console.error('❌ Error en procesamiento paralelo:', error);
   }
 };
 

@@ -41,6 +41,7 @@ export class AudioService {
   private onVolumeUpdate?: (volume: number, peak?: number) => void;
   private onStatsUpdate?: (stats: AudioStats) => void;
   private onError?: (error: string) => void;
+  private onAudioData?: (audioData: Float32Array, timestamp: number) => void;
 
   constructor() {
     this.config = {
@@ -167,6 +168,11 @@ export class AudioService {
       this.stats.volume = rms;
       this.onVolumeUpdate?.(rms, peak);
       
+      // Llamar callback de audio data para detección de silencio
+      if (this.onAudioData) {
+        this.onAudioData(resampledData, Date.now());
+      }
+      
       // Enviar solo si tiene contenido significativo
       const hasContent = pcmData.some(s => Math.abs(s) > 100);
       if (hasContent) {
@@ -266,6 +272,10 @@ export class AudioService {
 
   setErrorCallback(callback: (error: string) => void) {
     this.onError = callback;
+  }
+
+  setAudioDataCallback(callback: (audioData: Float32Array, timestamp: number) => void) {
+    this.onAudioData = callback;
   }
 
   getStats(): AudioStats {

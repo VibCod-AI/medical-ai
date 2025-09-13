@@ -133,6 +133,8 @@ export interface MedicalAnalysis {
   summary: string;
   confidence_level: number;
   requires_immediate_attention: boolean;
+  timestamp?: string; // Timestamp de cuando se generó el análisis
+  session_id?: string; // ID de la sesión médica asociada
 }
 
 export interface Transcription {
@@ -141,7 +143,8 @@ export interface Transcription {
   text: string;
   timestamp: string;
   confidence: number;
+  is_final?: boolean; // Nueva propiedad para distinguir transcripciones intermedias
 }
 
 // Tipos de navegación
-export type TabType = 'connection' | 'audio' | 'dashboard';
+export type TabType = 'dashboard' | 'config';

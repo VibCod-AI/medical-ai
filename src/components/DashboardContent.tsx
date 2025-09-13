@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Navbar from './Navbar'
 
 type TabType = 'perfil' | 'historico' | 'configuracion';
 
@@ -26,10 +27,9 @@ type ReportHistoryItem = {
 }
 
 export default function DashboardContent() {
-  const { user, profile, signOut, loading: authLoading } = useAuth()
+  const { user, profile } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [isSigningOut, setIsSigningOut] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('perfil')
   const [reportsHistory, setReportsHistory] = useState<ReportHistoryItem[]>([])
   const [loadingReports, setLoadingReports] = useState(false)
@@ -49,6 +49,7 @@ export default function DashboardContent() {
     }
   }, [activeTab, user])
 
+
   const loadReportsHistory = async () => {
     setLoadingReports(true)
     try {
@@ -67,28 +68,7 @@ export default function DashboardContent() {
     }
   }
 
-  const handleSignOut = async () => {
-      setIsSigningOut(true)
-      console.log('🚪 DashboardContent: Iniciando proceso de signOut...')
-      
-    try {
-      // No esperar por el signOut, ejecutar inmediatamente
-      signOut() // Sin await para evitar que se cuelgue
-      
-      console.log('🚀 DashboardContent: Redirigiendo inmediatamente...')
-      
-      // Pequeño delay para que se procese el signOut y luego redirección forzada
-      setTimeout(() => {
-        console.log('✅ DashboardContent: Forzando redirección...')
-        window.location.replace('/auth') // replace en lugar de href para no poder volver atrás
-      }, 500) // 500ms delay
-      
-    } catch (error) {
-        console.error('❌ DashboardContent: Error en signOut:', error)
-      // Redirección inmediata en caso de error
-      window.location.replace('/auth')
-    }
-  }
+
 
   return (
     <div style={{
@@ -98,142 +78,7 @@ export default function DashboardContent() {
       minHeight: '100vh'
     }}>
       {/* Navigation */}
-      <nav style={{
-        position: 'fixed',
-        top: '1rem',
-        left: '2rem',
-        right: '2rem',
-        zIndex: 100,
-        padding: '0.75rem 1.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRadius: '30px',
-        border: '2px solid rgba(255, 255, 255, 0.3)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
-        transition: 'all 0.3s ease'
-      }}>
-        <div style={{
-          fontSize: '22px',
-          fontWeight: '700',
-          color: '#2C2C2E'
-        }}>
-          Medical AI
-        </div>
-        
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '2.5rem'
-        }}>
-          <span style={{ 
-            color: '#2C2C2E', 
-            textDecoration: 'none', 
-            fontSize: '15px', 
-            fontWeight: '700',
-            textShadow: 'none',
-          }}>
-            Dashboard
-          </span>
-          
-          <span
-            onClick={() => router.push('/medical')}
-            style={{ 
-              color: '#6C6C70', 
-              textDecoration: 'none', 
-              fontSize: '15px', 
-              fontWeight: '500',
-              textShadow: 'none',
-              transition: 'all 0.2s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#2C2C2E'
-              e.currentTarget.style.fontWeight = '600'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#6C6C70'
-              e.currentTarget.style.fontWeight = '500'
-            }}
-          >
-            Consultas
-          </span>
-          
-          <a 
-            href="#reports" 
-            style={{ 
-              color: '#6C6C70', 
-              textDecoration: 'none', 
-              fontSize: '15px', 
-              fontWeight: '500',
-              textShadow: 'none',
-              transition: 'all 0.2s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#2C2C2E'
-              e.currentTarget.style.fontWeight = '600'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#6C6C70'
-              e.currentTarget.style.fontWeight = '500'
-            }}
-          >
-            Reportes
-          </a>
-
-          {/* User Profile Section */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            marginLeft: '1rem',
-            paddingLeft: '1rem',
-            borderLeft: '1px solid rgba(255, 255, 255, 0.3)'
-          }}>
-            <div style={{
-              color: '#2C2C2E',
-              fontSize: '14px',
-              fontWeight: '500',
-              textShadow: 'none'
-            }}>
-              {profile?.full_name || user?.email || 'Usuario'}
-          </div>
-          
-          <button
-            onClick={handleSignOut}
-            disabled={isSigningOut || authLoading}
-            style={{
-                background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
-              color: 'white',
-              border: 'none',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '20px',
-                fontSize: '15px',
-              fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
-                e.currentTarget.style.transform = 'translateY(-1px)'
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
-              }}
-            >
-              {isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}
-          </button>
-        </div>
-        </div>
-      </nav>
+      <Navbar activeSection="dashboard" />
 
       {/* Main Content */}
       <main style={{
@@ -263,13 +108,13 @@ export default function DashboardContent() {
             <br />
               <span style={{
               background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
-              WebkitBackgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
-            }}>
+          }}>
               Dashboard Médico
             </span>
           </h1>
-          <p style={{
+            <p style={{ 
             fontSize: '1.375rem',
             color: '#6C6C70',
             maxWidth: '700px',
@@ -278,9 +123,9 @@ export default function DashboardContent() {
             fontWeight: '400'
           }}>
             Hola, {profile?.full_name?.split(' ')[0] || 'Doctor'}. Tu asistente médico IA está listo para ayudarte con diagnósticos y consultas de pacientes.
-          </p>
-        </div>
-
+            </p>
+          </div>
+          
         {/* Orb Container */}
         <div style={{ position: 'relative', marginBottom: '3rem' }}>
           <div className="orb-video"></div>
@@ -297,7 +142,7 @@ export default function DashboardContent() {
               <input
                 type="text"
                 placeholder="Buscar insights médicos, síntomas, interacciones..."
-                style={{
+            style={{
                   width: '100%',
                   padding: '1rem 3rem 1rem 1.5rem',
                   fontSize: '16px',
@@ -326,7 +171,7 @@ export default function DashboardContent() {
                 transform: 'translateY(-50%)',
                 borderRadius: '50%',
                 background: '#5B9CFF',
-                border: 'none',
+              border: 'none',
                 width: '36px',
                 height: '36px',
                 cursor: 'pointer',
@@ -350,13 +195,13 @@ export default function DashboardContent() {
                   <path d="m5 12 7-7 7 7"/>
                   <path d="m12 19 0-14"/>
                 </svg>
-              </button>
-            </div>
+          </button>
+        </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-            <div style={{
+          <div style={{
               display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '2rem',
@@ -474,15 +319,15 @@ export default function DashboardContent() {
         </div>
 
         {/* Action Cards */}
-        <div style={{
-          display: 'grid',
+            <div style={{
+              display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: '2rem',
           maxWidth: '1200px',
           width: '100%',
           marginBottom: '4rem'
         }}>
-          <div style={{
+              <div style={{
             background: 'rgba(255, 255, 255, 0.8)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.8)',
@@ -1218,30 +1063,130 @@ export default function DashboardContent() {
             )}
 
             {activeTab === 'configuracion' && (
-              <div style={{ textAlign: 'center' }}>
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  color: '#2C2C2E',
+              <div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   marginBottom: '2rem'
                 }}>
-                  Configuración
+                <h3 style={{
+                    fontSize: '1.5rem',
+                  fontWeight: '600',
+                    color: '#2C2C2E',
+                    margin: 0
+                }}>
+                    Configuración del Sistema
                 </h3>
+                </div>
+
+                {/* Sección de Calibración de Voz */}
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.8)',
+                  padding: '2rem',
+                  marginBottom: '2rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <div>
+                      <h4 style={{
+                        fontSize: '1.25rem',
+                        fontWeight: '600',
+                        color: '#2C2C2E',
+                        margin: '0 0 0.5rem 0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        🎙️ Calibración de Voz
+                      </h4>
+                      <p style={{
+                        color: '#6C6C70',
+                        fontSize: '0.9rem',
+                        margin: 0,
+                        lineHeight: '1.5'
+                      }}>
+                        Configura tu perfil de voz para mejorar la precisión en la identificación 
+                        durante las consultas médicas
+                      </p>
+                    </div>
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      background: '#ECFDF5',
+                      color: '#059669',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '10px',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      border: '1px solid #A7F3D0'
+                    }}>
+                      ✅ Usando Deepgram
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '1rem',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.6)',
+                      padding: '1rem',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255, 255, 255, 0.8)'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', color: '#6C6C70', marginBottom: '0.25rem' }}>
+                        Sistema de Identificación
+                      </div>
+                      <div style={{ fontWeight: '600', color: '#2C2C2E' }}>
+                        Deepgram Diarization
+                      </div>
+                    </div>
+                    
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.6)',
+                      padding: '1rem',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255, 255, 255, 0.8)'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', color: '#6C6C70', marginBottom: '0.25rem' }}>
+                        Mapeo de Voces
+                      </div>
+                      <div style={{ fontWeight: '600', color: '#2C2C2E', fontSize: '0.875rem' }}>
+                        Speaker 0: Médico<br/>
+                        Speaker 1: Paciente
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Otras configuraciones futuras */}
                 <div style={{
                   textAlign: 'center',
-                  padding: '3rem',
+                  padding: '2rem',
                   background: 'rgba(255, 255, 255, 0.6)',
                   backdropFilter: 'blur(10px)',
                   borderRadius: '20px',
                   border: '1px solid rgba(255, 255, 255, 0.8)',
                   color: '#6C6C70'
                 }}>
-                  <div style={{ fontSize: '64px', marginBottom: '1rem' }}>⚙️</div>
-                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#2C2C2E', fontSize: '1.25rem', fontWeight: '600' }}>
-                    Próximamente
+                  <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⚙️</div>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#2C2C2E', fontSize: '1.1rem', fontWeight: '600' }}>
+                    Más configuraciones próximamente
                   </h4>
-                  <p style={{ margin: 0, fontSize: '1rem' }}>
-                    Funciones de configuración estarán disponibles pronto
+                  <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                    Funciones adicionales de configuración estarán disponibles pronto
                   </p>
                 </div>
               </div>
@@ -1353,6 +1298,7 @@ export default function DashboardContent() {
           100% { transform: rotate(360deg); }
         }
       `}</style>
+
     </div>
   )
 }
