@@ -146,5 +146,56 @@ export interface Transcription {
   is_final?: boolean; // Nueva propiedad para distinguir transcripciones intermedias
 }
 
+// Tipos para reportes médicos
+export interface CreateMedicalReportData {
+  session_id: string;
+  session_duration: string;
+  total_transcriptions: number;
+  consultation_phase: string;
+  transcriptions: Transcription[];
+  medical_analysis: MedicalAnalysis | null;
+  symptoms: Symptom[];
+  diagnoses: Diagnosis[];
+  recommendations: Recommendation[];
+  red_flags: RedFlag[];
+  follow_up: FollowUpRecommendation[];
+  alternative_treatments: AlternativeTreatment[];
+  emergency_criteria: EmergencyCriteria[];
+  suggested_questions: SuggestedQuestion[];
+  summary?: string | null;
+  confidence_level?: number | null;
+  requires_immediate_attention: boolean;
+  final_report?: FinalMedicalReport | null;
+  tags?: string[];
+  notes?: string;
+}
+
+export interface MedicalReport {
+  id: string;
+  user_id: string;
+  session_id: string;
+  session_duration: string;
+  total_transcriptions: number;
+  consultation_phase: string;
+  transcriptions: Transcription[];
+  medical_analysis: MedicalAnalysis | null;
+  symptoms: Symptom[];
+  diagnoses: Diagnosis[];
+  recommendations: Recommendation[];
+  red_flags: RedFlag[];
+  follow_up: FollowUpRecommendation[];
+  alternative_treatments: AlternativeTreatment[];
+  emergency_criteria: EmergencyCriteria[];
+  suggested_questions: SuggestedQuestion[];
+  summary?: string | null;
+  confidence_level?: number | null;
+  requires_immediate_attention: boolean;
+  final_report?: FinalMedicalReport | null;
+  tags: string[];
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Tipos de navegación
 export type TabType = 'dashboard' | 'config';

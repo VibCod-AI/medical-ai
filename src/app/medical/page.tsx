@@ -5,10 +5,11 @@ import { useSearchParams } from 'next/navigation';
 import ConnectionTest from '../../components/ConnectionTest';
 import AudioRecorder from '../../components/AudioRecorder';
 import MedicalDashboard from '../../components/MedicalDashboard';
+import MedicalReports from '../../components/MedicalReports';
 import Navbar from '../../components/Navbar';
 
 export default function MedicalPage() {
-  const [activeSection, setActiveSection] = useState<'consultas' | 'configuracion'>('consultas');
+  const [activeSection, setActiveSection] = useState<'consultas' | 'configuracion' | 'reportes'>('consultas');
   const searchParams = useSearchParams();
 
   // Detectar parámetro de sección en la URL
@@ -16,6 +17,12 @@ export default function MedicalPage() {
     const section = searchParams?.get('section');
     if (section === 'configuracion') {
       setActiveSection('configuracion');
+      // Limpiar la URL sin recargar la página
+      const url = new URL(window.location.href);
+      url.searchParams.delete('section');
+      window.history.replaceState({}, '', url.pathname);
+    } else if (section === 'reportes') {
+      setActiveSection('reportes');
       // Limpiar la URL sin recargar la página
       const url = new URL(window.location.href);
       url.searchParams.delete('section');
@@ -29,6 +36,9 @@ export default function MedicalPage() {
       case 'consultas':
         // Mostrar directamente el Dashboard Médico
         return <MedicalDashboard />;
+      case 'reportes':
+        // Mostrar el componente de reportes médicos
+        return <MedicalReports />;
       case 'configuracion':
         return (
           <div>

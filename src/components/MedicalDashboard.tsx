@@ -8,7 +8,8 @@ import {
   MedicalAnalysis,
   Transcription,
   FinalMedicalReport
-} from '../types/medical';
+  } from '../types/medical';
+import { CreateMedicalReportData } from '../types/medical';
 
 const MedicalDashboard: React.FC = () => {
   const { user, profile } = useAuth();
@@ -24,6 +25,13 @@ const MedicalDashboard: React.FC = () => {
   const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
   const [isSavingReport, setIsSavingReport] = useState<boolean>(false);
   const [isReportSaved, setIsReportSaved] = useState<boolean>(false);
+  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
+  const [saveResult, setSaveResult] = useState<{ success: boolean; reportId?: string; error?: string } | null>(null);
+  const [allSuggestedQuestions, setAllSuggestedQuestions] = useState<Array<{
+    question: any;
+    timestamp: string;
+    analysis_id: string;
+  }>>([]);
   const [sessionInfo, setSessionInfo] = useState<{
     phase: string;
     duration: string;
@@ -277,6 +285,27 @@ const MedicalDashboard: React.FC = () => {
     socketService.on('medical-analysis', (...args: unknown[]) => {
       const analysis = args[0] as MedicalAnalysis;
       console.log('📊 Nuevo análisis médico recibido:', analysis);
+      
+      // Acumular TODAS las preguntas sugeridas que aparecen
+      if (analysis.suggested_questions && analysis.suggested_questions.length > 0) {
+        const timestamp = new Date().toISOString();
+        const analysisId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        console.log(`💡 Acumulando ${analysis.suggested_questions.length} preguntas sugeridas del análisis ${analysisId}`);
+        
+        setAllSuggestedQuestions(prev => {
+          const newQuestions = analysis.suggested_questions.map(question => ({
+            question,
+            timestamp,
+            analysis_id: analysisId
+          }));
+          
+          const updated = [...prev, ...newQuestions];
+          console.log(`📝 Total preguntas acumuladas: ${updated.length}`);
+          return updated;
+        });
+      }
+      
       setCurrentAnalysis(analysis);
       
       // Actualizar información de sesión cuando llegue un nuevo análisis
@@ -398,6 +427,7 @@ const MedicalDashboard: React.FC = () => {
       setSessionTime(0);
       setTranscriptions([]);
       setCurrentAnalysis(null);
+      setAllSuggestedQuestions([]); // Limpiar preguntas acumuladas de sesiones anteriores
       setPendingTranscription(''); // Limpiar transcripción pendiente
       silenceStartRef.current = 0; // Reset detección de silencio
       audioSamplesRef.current = []; // Limpiar muestras anteriores
@@ -455,9 +485,31 @@ const MedicalDashboard: React.FC = () => {
       silenceTimerRef.current = null;
     }
 
-    // Auto-guardar sesión si hay contenido
+    // Auto-guardar reporte médico si hay contenido
     if (transcriptions.length > 0 || currentAnalysis) {
-      await saveCurrentSession();
+      console.log('💾 Auto-guardando reporte médico al finalizar consulta...');
+      setIsSavingReport(true);
+      
+      try {
+        const result = await saveCurrentReport();
+        setSaveResult(result);
+        setShowSaveModal(true);
+        
+        if (result.success) {
+          console.log('✅ Reporte médico auto-guardado exitosamente:', result.reportId);
+        } else {
+          console.error('❌ Error auto-guardando reporte:', result.error);
+        }
+      } catch (error) {
+        console.error('❌ Error inesperado auto-guardando reporte:', error);
+        setSaveResult({
+          success: false,
+          error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+        setShowSaveModal(true);
+      } finally {
+        setIsSavingReport(false);
+      }
     }
 
     console.log('⏹️ Consulta médica finalizada');
@@ -586,6 +638,104 @@ const MedicalDashboard: React.FC = () => {
     }
   };
 
+  // Función para guardar reporte médico
+  const saveCurrentReport = async (): Promise<{ success: boolean; reportId?: string; error?: string }> => {
+    try {
+      console.log('🚀 Iniciando saveCurrentReport...');
+      console.log('👤 Usuario actual:', user ? user.id : 'NO USER');
+      console.log('📝 Transcripciones:', transcriptions.length);
+      
+      if (!user) {
+        console.error('❌ No hay usuario autenticado');
+        return { success: false, error: 'No hay usuario autenticado. Por favor, inicia sesión nuevamente.' };
+      }
+
+      if (transcriptions.length === 0) {
+        console.error('❌ No hay transcripciones para guardar');
+        return { success: false, error: 'No hay transcripciones para guardar' };
+      }
+
+      // Generar session_id único si no existe
+      const sessionId = currentSessionId || `session_${Date.now()}_${user.id}`;
+      
+      // Preparar datos del reporte con validación extra
+      const reportData: CreateMedicalReportData = {
+        session_id: sessionId,
+        session_duration: sessionInfo?.duration || `${Math.round(sessionTime / 60)} minutos`,
+        total_transcriptions: transcriptions.length,
+        consultation_phase: sessionInfo?.phase || 'listening',
+        
+        // Datos de la consulta
+        transcriptions: transcriptions,
+        medical_analysis: currentAnalysis,
+        
+        // Datos estructurados del análisis
+        symptoms: currentAnalysis?.symptoms || [],
+        diagnoses: currentAnalysis?.diagnoses || [],
+        recommendations: currentAnalysis?.recommendations || [],
+        red_flags: currentAnalysis?.red_flags || [],
+        follow_up: currentAnalysis?.follow_up || [],
+        alternative_treatments: currentAnalysis?.alternative_treatments || [],
+        emergency_criteria: currentAnalysis?.emergency_criteria || [],
+        suggested_questions: allSuggestedQuestions.map(item => ({
+          ...item.question,
+          generated_at: item.timestamp,
+          analysis_id: item.analysis_id
+        })), // TODAS las preguntas sugeridas acumuladas durante la consulta
+        
+        // Resumen y metadatos
+        summary: currentAnalysis?.summary || null,
+        confidence_level: currentAnalysis?.confidence_level || null,
+        requires_immediate_attention: currentAnalysis?.requires_immediate_attention || false,
+        
+        // Informe final si existe
+        final_report: finalReport,
+        
+        // Metadatos adicionales
+        tags: currentAnalysis?.requires_immediate_attention ? ['urgente'] : [],
+        notes: `Consulta médica - ${new Date().toLocaleDateString()}`
+      };
+
+      console.log('💾 Guardando reporte médico...', { 
+        sessionId, 
+        transcriptions: transcriptions.length,
+        userId: user.id,
+        hasAnalysis: !!currentAnalysis,
+        totalSuggestedQuestions: allSuggestedQuestions.length,
+        currentQuestions: currentAnalysis?.suggested_questions?.length || 0
+      });
+      
+      console.log(`📝 PREGUNTAS ACUMULADAS: ${allSuggestedQuestions.length} preguntas de ${new Set(allSuggestedQuestions.map(q => q.analysis_id)).size} análisis diferentes`);
+
+      // Llamar al API endpoint
+      const response = await fetch('/api/medical-reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+      });
+
+      const result = await response.json();
+      
+      if (result.success && result.report) {
+        console.log('✅ Reporte médico guardado exitosamente:', result.report.id);
+        setCurrentSessionId(result.report.id);
+        return { success: true, reportId: result.report.id };
+      } else {
+        console.error('❌ Error guardando reporte:', result.error);
+        return { success: false, error: result.error || 'Error desconocido del servidor' };
+      }
+
+    } catch (error) {
+      console.error('❌ Error en saveCurrentReport:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Error de conexión' 
+      };
+    }
+  };
+
   const generateFinalReport = async () => {
     if (transcriptions.length < 4) {
       alert('La consulta es muy corta para generar un informe completo. Necesita al menos 4 intercambios.');
@@ -693,24 +843,24 @@ const MedicalDashboard: React.FC = () => {
           ) : (
             <button
               onClick={stopSession}
-              disabled={isSavingSession}
+              disabled={isSavingSession || isSavingReport}
               style={{
-                background: isSavingSession ? 'rgba(108, 108, 112, 0.5)' : 'linear-gradient(135deg, #FF6B6B 0%, #E74C3C 100%)',
+                background: (isSavingSession || isSavingReport) ? 'rgba(108, 108, 112, 0.5)' : 'linear-gradient(135deg, #FF6B6B 0%, #E74C3C 100%)',
                 color: 'white',
                 border: 'none',
                 padding: '12px 24px',
                 borderRadius: '20px',
                 fontSize: '15px',
                 fontWeight: '600',
-                cursor: isSavingSession ? 'not-allowed' : 'pointer',
+                cursor: (isSavingSession || isSavingReport) ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 transition: 'all 0.2s ease',
-                boxShadow: !isSavingSession ? '0 4px 14px rgba(255, 107, 107, 0.3)' : 'none'
+                boxShadow: !(isSavingSession || isSavingReport) ? '0 4px 14px rgba(255, 107, 107, 0.3)' : 'none'
               }}
             >
-              {isSavingSession ? 'Guardando...' : 'Finalizar Consulta'}
+              {isSavingReport ? '💾 Guardando Reporte...' : isSavingSession ? 'Finalizando...' : 'Finalizar Consulta'}
             </button>
           )}
           
@@ -727,28 +877,80 @@ const MedicalDashboard: React.FC = () => {
             {isRecording ? 'GRABANDO' : 'DETENIDO'}
           </div>
           
-          {/* Botón Generar Informe Final */}
-          {!isRecording && transcriptions.length >= 4 && (
-            <button
-              onClick={generateFinalReport}
-              disabled={isGeneratingReport}
-              style={{
-                background: isGeneratingReport ? '#9ca3af' : '#7c3aed',
-                color: 'white',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: isGeneratingReport ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              {isGeneratingReport ? '⏳ Generando...' : '📋 Generar Informe Final'}
-            </button>
-          )}
+           {/* Botón Guardar Reporte */}
+           {!isRecording && transcriptions.length > 0 && (
+             <button
+               onClick={async () => {
+                 setIsSavingReport(true);
+                 try {
+                   const result = await saveCurrentReport();
+                   if (result.success) {
+                     alert('✅ Reporte guardado exitosamente.\n\nPuedes verlo en la sección "Reportes".');
+                   } else {
+                     alert(`❌ Error guardando reporte: ${result.error}`);
+                   }
+                 } catch (error) {
+                   console.error('❌ Error inesperado:', error);
+                   alert(`❌ Error inesperado: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+                 } finally {
+                   setIsSavingReport(false);
+                 }
+               }}
+               disabled={isSavingReport}
+               style={{
+                 background: isSavingReport ? '#9ca3af' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                 color: 'white',
+                 border: 'none',
+                 borderRadius: '12px',
+                 padding: '14px 24px',
+                 fontSize: '15px',
+                 fontWeight: '600',
+                 cursor: isSavingReport ? 'not-allowed' : 'pointer',
+                 display: 'flex',
+                 alignItems: 'center',
+                 gap: '8px',
+                 boxShadow: !isSavingReport ? '0 4px 14px rgba(16, 185, 129, 0.3)' : 'none',
+                 transition: 'all 0.2s ease'
+               }}
+               onMouseEnter={(e) => {
+                 if (!isSavingReport) {
+                   e.currentTarget.style.transform = 'translateY(-1px)';
+                   e.currentTarget.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.4)';
+                 }
+               }}
+               onMouseLeave={(e) => {
+                 if (!isSavingReport) {
+                   e.currentTarget.style.transform = 'translateY(0)';
+                   e.currentTarget.style.boxShadow = '0 4px 14px rgba(16, 185, 129, 0.3)';
+                 }
+               }}
+             >
+               {isSavingReport ? '💾 Guardando...' : '💾 Guardar Reporte'}
+             </button>
+           )}
+
+           {/* Botón Generar Informe Final */}
+           {!isRecording && transcriptions.length >= 4 && (
+             <button
+               onClick={generateFinalReport}
+               disabled={isGeneratingReport}
+               style={{
+                 background: isGeneratingReport ? '#9ca3af' : '#7c3aed',
+                 color: 'white',
+                 border: 'none',
+                 padding: '12px 24px',
+                 borderRadius: '8px',
+                 fontSize: '16px',
+                 fontWeight: '600',
+                 cursor: isGeneratingReport ? 'not-allowed' : 'pointer',
+                 display: 'flex',
+                 alignItems: 'center',
+                 gap: '8px'
+               }}
+             >
+               {isGeneratingReport ? '⏳ Generando...' : '📋 Generar Informe Final'}
+             </button>
+           )}
 
           <div style={{ marginLeft: 'auto', fontSize: '14px', color: '#6b7280' }}>
             Transcripciones: {transcriptions.length}
@@ -1585,6 +1787,197 @@ const MedicalDashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de Guardado Automático */}
+      {showSaveModal && saveResult && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1100,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            maxWidth: '500px',
+            width: '100%',
+            padding: '32px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}>
+            {/* Icono y título */}
+            <div style={{
+              fontSize: '64px',
+              marginBottom: '16px'
+            }}>
+              {saveResult.success ? '✅' : '❌'}
+            </div>
+            
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '700',
+              color: saveResult.success ? '#059669' : '#dc2626',
+              marginBottom: '16px'
+            }}>
+              {saveResult.success ? '¡Reporte Guardado!' : 'Error al Guardar'}
+            </h2>
+            
+            <p style={{
+              fontSize: '16px',
+              color: '#6b7280',
+              lineHeight: '1.5',
+              marginBottom: '24px'
+            }}>
+              {saveResult.success 
+                ? 'Tu consulta médica ha sido guardada exitosamente. Puedes encontrarla en la sección "Reportes".'
+                : `Hubo un problema al guardar el reporte: ${saveResult.error}`
+              }
+            </p>
+            
+            {/* Información adicional si fue exitoso */}
+            {saveResult.success && saveResult.reportId && (
+              <div style={{
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px',
+                padding: '12px',
+                marginBottom: '24px'
+              }}>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#059669',
+                  fontWeight: '600'
+                }}>
+                  📋 ID del Reporte: {saveResult.reportId.substring(0, 8)}...
+                </div>
+                <div style={{
+                  fontSize: '12px',
+                  color: '#065f46',
+                  marginTop: '4px'
+                }}>
+                  {transcriptions.length} transcripciones • {currentAnalysis ? 'Con análisis IA' : 'Sin análisis'}
+                </div>
+              </div>
+            )}
+            
+            {/* Botones */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
+              {saveResult.success && (
+                <button
+                  onClick={() => {
+                    setShowSaveModal(false);
+                    // Navegar a reportes
+                    window.location.href = '/medical?section=reportes';
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(59, 130, 246, 0.3)';
+                  }}
+                >
+                  📊 Ver Reportes
+                </button>
+              )}
+              
+              {!saveResult.success && (
+                <button
+                  onClick={async () => {
+                    setShowSaveModal(false);
+                    // Intentar guardar nuevamente
+                    setIsSavingReport(true);
+                    try {
+                      const result = await saveCurrentReport();
+                      setSaveResult(result);
+                      setShowSaveModal(true);
+                    } catch (error) {
+                      setSaveResult({
+                        success: false,
+                        error: error instanceof Error ? error.message : 'Error desconocido'
+                      });
+                      setShowSaveModal(true);
+                    } finally {
+                      setIsSavingReport(false);
+                    }
+                  }}
+                  disabled={isSavingReport}
+                  style={{
+                    background: isSavingReport ? '#9ca3af' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: isSavingReport ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {isSavingReport ? '⏳ Reintentando...' : '🔄 Reintentar'}
+                </button>
+              )}
+              
+              <button
+                onClick={() => setShowSaveModal(false)}
+                style={{
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#e5e7eb';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f3f4f6';
+                }}
+              >
+                {saveResult.success ? '✅ Entendido' : '❌ Cerrar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal del Informe Final */}
       {showFinalReport && finalReport && (

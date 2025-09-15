@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 
 type NavbarProps = {
   activeSection?: 'dashboard' | 'consultas' | 'configuracion' | 'reportes';
-  onSectionChange?: (section: 'consultas' | 'configuracion') => void;
+  onSectionChange?: (section: 'consultas' | 'configuracion' | 'reportes') => void;
 };
 
 export default function Navbar({ activeSection, onSectionChange }: NavbarProps) {
@@ -166,13 +166,21 @@ export default function Navbar({ activeSection, onSectionChange }: NavbarProps) 
         </span>
         
         {/* Reportes */}
-        <a 
-          href="#reports" 
+        <span 
+          onClick={() => {
+            if (isOnMedicalPage && onSectionChange) {
+              // Si estamos en la página médica, cambiar sección
+              onSectionChange('reportes');
+            } else {
+              // Si estamos en otra página, navegar a médica con reportes
+              router.push('/medical?section=reportes');
+            }
+          }}
           style={{ 
-            color: '#6C6C70', 
+            color: activeSection === 'reportes' ? '#2C2C2E' : '#6C6C70', 
             textDecoration: 'none', 
             fontSize: '15px', 
-            fontWeight: '500',
+            fontWeight: activeSection === 'reportes' ? '700' : '500',
             textShadow: 'none',
             transition: 'all 0.2s ease',
             cursor: 'pointer'
@@ -182,12 +190,14 @@ export default function Navbar({ activeSection, onSectionChange }: NavbarProps) 
             e.currentTarget.style.fontWeight = '600';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#6C6C70';
-            e.currentTarget.style.fontWeight = '500';
+            if (activeSection !== 'reportes') {
+              e.currentTarget.style.color = '#6C6C70';
+              e.currentTarget.style.fontWeight = '500';
+            }
           }}
         >
           Reportes
-        </a>
+        </span>
 
         {/* User Profile Section */}
         <div style={{
