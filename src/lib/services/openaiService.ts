@@ -588,20 +588,25 @@ IMPORTANTE:
   }
 
   // Validar estructura del análisis - Exactamente igual que medical-main
-  private validateAnalysisStructure(analysis: any): boolean {
+  private validateAnalysisStructure(analysis: unknown): boolean {
+    if (!analysis || typeof analysis !== 'object') {
+      return false;
+    }
+    
+    const obj = analysis as Record<string, unknown>;
+    
     return (
-      analysis &&
-      Array.isArray(analysis.symptoms) &&
-      Array.isArray(analysis.diagnoses) &&
-      Array.isArray(analysis.recommendations) &&
-      Array.isArray(analysis.red_flags) &&
-      Array.isArray(analysis.follow_up) &&
-      Array.isArray(analysis.alternative_treatments) &&
-      Array.isArray(analysis.emergency_criteria) &&
-      Array.isArray(analysis.suggested_questions) &&
-      typeof analysis.summary === 'string' &&
-      typeof analysis.confidence_level === 'number' &&
-      typeof analysis.requires_immediate_attention === 'boolean'
+      Array.isArray(obj.symptoms) &&
+      Array.isArray(obj.diagnoses) &&
+      Array.isArray(obj.recommendations) &&
+      Array.isArray(obj.red_flags) &&
+      Array.isArray(obj.follow_up) &&
+      Array.isArray(obj.alternative_treatments) &&
+      Array.isArray(obj.emergency_criteria) &&
+      Array.isArray(obj.suggested_questions) &&
+      typeof obj.summary === 'string' &&
+      typeof obj.confidence_level === 'number' &&
+      typeof obj.requires_immediate_attention === 'boolean'
     );
   }
 

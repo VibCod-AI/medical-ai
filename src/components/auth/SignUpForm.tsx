@@ -47,24 +47,6 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
     })
   }
 
-  const handleRoleSelect = (role: 'patient' | 'doctor') => {
-    setFormData({
-      ...formData,
-      role
-    })
-    setRoleDropdownOpen(false)
-  }
-
-  const getRoleDisplayInfo = (role: 'patient' | 'doctor') => {
-    switch (role) {
-      case 'patient':
-        return { icon: '🧑‍🦱', label: 'Paciente', description: 'Recibir consultas médicas' }
-      case 'doctor':
-        return { icon: '👨‍⚕️', label: 'Médico', description: 'Realizar consultas médicas' }
-      default:
-        return { icon: '👤', label: 'Seleccionar...', description: '' }
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

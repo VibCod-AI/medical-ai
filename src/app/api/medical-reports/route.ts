@@ -1,30 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-
-// Tipos para los reportes médicos
-interface CreateMedicalReportData {
-  session_id: string;
-  session_duration: string;
-  total_transcriptions: number;
-  consultation_phase: string;
-  transcriptions: any[];
-  medical_analysis: any;
-  symptoms: any[];
-  diagnoses: any[];
-  recommendations: any[];
-  red_flags: any[];
-  follow_up: any[];
-  alternative_treatments: any[];
-  emergency_criteria: any[];
-  suggested_questions: any[];
-  summary?: string;
-  confidence_level?: number;
-  requires_immediate_attention: boolean;
-  final_report?: any;
-  tags?: string[];
-  notes?: string;
-}
+import { CreateMedicalReportData } from '@/types/medical';
 
 // Crear cliente de Supabase para el servidor
 async function createSupabaseServerClient() {

@@ -22,16 +22,10 @@ const MedicalDashboard: React.FC = () => {
   const [showFinalReport, setShowFinalReport] = useState<boolean>(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState<boolean>(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
   const [isSavingReport, setIsSavingReport] = useState<boolean>(false);
   const [isReportSaved, setIsReportSaved] = useState<boolean>(false);
   const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
   const [saveResult, setSaveResult] = useState<{ success: boolean; reportId?: string; error?: string } | null>(null);
-  const [allSuggestedQuestions, setAllSuggestedQuestions] = useState<Array<{
-    question: any;
-    timestamp: string;
-    analysis_id: string;
-  }>>([]);
   const [sessionInfo, setSessionInfo] = useState<{
     phase: string;
     duration: string;
@@ -49,16 +43,6 @@ const MedicalDashboard: React.FC = () => {
     features?: any;
   }[]>([]);
   
-  // Tracking de speakers para detectar cambios
-  const speakerTrackingRef = useRef<{
-    lastSpeaker: string | null;
-    speakerSequence: { speaker: string; timestamp: number; confidence: number }[];
-    consecutiveCount: number;
-  }>({
-    lastSpeaker: null,
-    speakerSequence: [],
-    consecutiveCount: 0
-  });
   
   // Estado para detección de silencio y transcripciones pendientes
   const [pendingTranscription, setPendingTranscription] = useState<string>('');
@@ -202,47 +186,6 @@ const MedicalDashboard: React.FC = () => {
 
 
 
-  // Función para crear un blob WAV a partir de datos PCM
-  const createWavBlob = (pcmData: Int16Array, sampleRate: number): Blob => {
-    const channels = 1;
-    const bitsPerSample = 16;
-    const bytesPerSample = bitsPerSample / 8;
-    const blockAlign = channels * bytesPerSample;
-    const byteRate = sampleRate * blockAlign;
-    const dataSize = pcmData.length * bytesPerSample;
-    const fileSize = 44 + dataSize;
-
-    const buffer = new ArrayBuffer(fileSize);
-    const view = new DataView(buffer);
-
-    // WAV header
-    const writeString = (offset: number, string: string) => {
-      for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-      }
-    };
-
-    writeString(0, 'RIFF');
-    view.setUint32(4, fileSize - 8, true);
-    writeString(8, 'WAVE');
-    writeString(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, channels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, byteRate, true);
-    view.setUint16(32, blockAlign, true);
-    view.setUint16(34, bitsPerSample, true);
-    writeString(36, 'data');
-    view.setUint32(40, dataSize, true);
-
-    // PCM data
-    for (let i = 0; i < pcmData.length; i++) {
-      view.setInt16(44 + i * 2, pcmData[i], true);
-    }
-
-    return new Blob([buffer], { type: 'audio/wav' });
-  };
 
   // Función para obtener información de la sesión actual
   const fetchSessionInfo = async () => {
@@ -285,27 +228,6 @@ const MedicalDashboard: React.FC = () => {
     socketService.on('medical-analysis', (...args: unknown[]) => {
       const analysis = args[0] as MedicalAnalysis;
       console.log('📊 Nuevo análisis médico recibido:', analysis);
-      
-      // Acumular TODAS las preguntas sugeridas que aparecen
-      if (analysis.suggested_questions && analysis.suggested_questions.length > 0) {
-        const timestamp = new Date().toISOString();
-        const analysisId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        console.log(`💡 Acumulando ${analysis.suggested_questions.length} preguntas sugeridas del análisis ${analysisId}`);
-        
-        setAllSuggestedQuestions(prev => {
-          const newQuestions = analysis.suggested_questions.map(question => ({
-            question,
-            timestamp,
-            analysis_id: analysisId
-          }));
-          
-          const updated = [...prev, ...newQuestions];
-          console.log(`📝 Total preguntas acumuladas: ${updated.length}`);
-          return updated;
-        });
-      }
-      
       setCurrentAnalysis(analysis);
       
       // Actualizar información de sesión cuando llegue un nuevo análisis
@@ -427,7 +349,6 @@ const MedicalDashboard: React.FC = () => {
       setSessionTime(0);
       setTranscriptions([]);
       setCurrentAnalysis(null);
-      setAllSuggestedQuestions([]); // Limpiar preguntas acumuladas de sesiones anteriores
       setPendingTranscription(''); // Limpiar transcripción pendiente
       silenceStartRef.current = 0; // Reset detección de silencio
       audioSamplesRef.current = []; // Limpiar muestras anteriores
@@ -516,53 +437,6 @@ const MedicalDashboard: React.FC = () => {
     console.log('🔇 DETECCIÓN DE SILENCIO desactivada');
   };
 
-  // Función para guardar sesión médica
-  const saveCurrentSession = async () => {
-    if (!user || isSavingSession) return;
-
-    setIsSavingSession(true);
-    
-    try {
-      const sessionData = {
-        duration: sessionTime,
-        timestamp: new Date().toISOString(),
-        user_info: {
-          id: user.id,
-          email: user.email,
-          name: profile?.full_name || user.email,
-          role: profile?.role || 'patient'
-        }
-      };
-
-      const response = await fetch('/api/medical-sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          patient_id: user.id,
-          session_data: sessionData,
-          transcriptions: transcriptions,
-          analyses: currentAnalysis ? [currentAnalysis] : [],
-          final_report: finalReport,
-          status: finalReport ? 'completed' : 'active'
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setCurrentSessionId(result.session.id);
-        console.log('✅ Sesión guardada:', result.session.id);
-      } else {
-        console.error('❌ Error guardando sesión:', result.error);
-      }
-    } catch (error) {
-      console.error('❌ Error guardando sesión:', error);
-    } finally {
-      setIsSavingSession(false);
-    }
-  };
 
   // Función para guardar solo el reporte final
   const saveFinalReport = async () => {
@@ -677,11 +551,7 @@ const MedicalDashboard: React.FC = () => {
         follow_up: currentAnalysis?.follow_up || [],
         alternative_treatments: currentAnalysis?.alternative_treatments || [],
         emergency_criteria: currentAnalysis?.emergency_criteria || [],
-        suggested_questions: allSuggestedQuestions.map(item => ({
-          ...item.question,
-          generated_at: item.timestamp,
-          analysis_id: item.analysis_id
-        })), // TODAS las preguntas sugeridas acumuladas durante la consulta
+        suggested_questions: currentAnalysis?.suggested_questions || [],
         
         // Resumen y metadatos
         summary: currentAnalysis?.summary || null,
@@ -700,12 +570,8 @@ const MedicalDashboard: React.FC = () => {
         sessionId, 
         transcriptions: transcriptions.length,
         userId: user.id,
-        hasAnalysis: !!currentAnalysis,
-        totalSuggestedQuestions: allSuggestedQuestions.length,
-        currentQuestions: currentAnalysis?.suggested_questions?.length || 0
+        hasAnalysis: !!currentAnalysis
       });
-      
-      console.log(`📝 PREGUNTAS ACUMULADAS: ${allSuggestedQuestions.length} preguntas de ${new Set(allSuggestedQuestions.map(q => q.analysis_id)).size} análisis diferentes`);
 
       // Llamar al API endpoint
       const response = await fetch('/api/medical-reports', {
@@ -843,24 +709,24 @@ const MedicalDashboard: React.FC = () => {
           ) : (
             <button
               onClick={stopSession}
-              disabled={isSavingSession || isSavingReport}
+              disabled={isSavingReport}
               style={{
-                background: (isSavingSession || isSavingReport) ? 'rgba(108, 108, 112, 0.5)' : 'linear-gradient(135deg, #FF6B6B 0%, #E74C3C 100%)',
+                background: isSavingReport ? 'rgba(108, 108, 112, 0.5)' : 'linear-gradient(135deg, #FF6B6B 0%, #E74C3C 100%)',
                 color: 'white',
                 border: 'none',
                 padding: '12px 24px',
                 borderRadius: '20px',
                 fontSize: '15px',
                 fontWeight: '600',
-                cursor: (isSavingSession || isSavingReport) ? 'not-allowed' : 'pointer',
+                cursor: isSavingReport ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 transition: 'all 0.2s ease',
-                boxShadow: !(isSavingSession || isSavingReport) ? '0 4px 14px rgba(255, 107, 107, 0.3)' : 'none'
+                boxShadow: !isSavingReport ? '0 4px 14px rgba(255, 107, 107, 0.3)' : 'none'
               }}
             >
-              {isSavingReport ? '💾 Guardando Reporte...' : isSavingSession ? 'Finalizando...' : 'Finalizar Consulta'}
+              {isSavingReport ? '💾 Guardando Reporte...' : 'Finalizar Consulta'}
             </button>
           )}
           

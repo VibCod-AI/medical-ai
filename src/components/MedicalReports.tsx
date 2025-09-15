@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { MedicalReport } from '../types/medical';
 
@@ -13,7 +13,7 @@ const MedicalReports: React.FC = () => {
   const reportsPerPage = 10;
 
   // Cargar reportes
-  const loadReports = async () => {
+  const loadReports = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -38,11 +38,11 @@ const MedicalReports: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, currentPage, showUrgentOnly, reportsPerPage]);
 
   useEffect(() => {
     loadReports();
-  }, [user, currentPage, showUrgentOnly]);
+  }, [loadReports]);
 
   // Eliminar reporte
   const deleteReport = async (reportId: string) => {
@@ -250,6 +250,7 @@ const MedicalReports: React.FC = () => {
                       {report.symptoms.length > 0 && <span>🎯 {report.symptoms.length} síntomas</span>}
                       {report.diagnoses.length > 0 && <span>🔍 {report.diagnoses.length} diagnósticos</span>}
                       {report.recommendations.length > 0 && <span>💡 {report.recommendations.length} recomendaciones</span>}
+                      {report.suggested_questions.length > 0 && <span>❓ {report.suggested_questions.length} preguntas</span>}
                     </div>
                   </div>
                 );
@@ -502,125 +503,108 @@ const MedicalReports: React.FC = () => {
                   {selectedReport.suggested_questions.length > 0 && (
                     <div style={{ marginBottom: '24px' }}>
                       <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937', marginBottom: '12px' }}>
-                        💡 Preguntas Sugeridas ({selectedReport.suggested_questions.length})
+                        ❓ Preguntas Sugeridas ({selectedReport.suggested_questions.length})
                       </h3>
-                      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                        {selectedReport.suggested_questions.map((question, index) => (
-                          <div key={index} style={{
-                            background: '#f8fafc',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            padding: '12px',
+                      {selectedReport.suggested_questions
+                        .sort((a, b) => {
+                          const priorityOrder = { 'alta': 3, 'media': 2, 'baja': 1 };
+                          return priorityOrder[b.priority] - priorityOrder[a.priority];
+                        })
+                        .map((question, index) => (
+                        <div key={index} style={{
+                          background: '#f0f9ff',
+                          border: '1px solid #0ea5e9',
+                          borderRadius: '8px',
+                          padding: '12px',
+                          marginBottom: '8px',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(question.question);
+                          alert('Pregunta copiada al portapapeles');
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#e0f2fe';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#f0f9ff';
+                        }}
+                        >
+                          <div style={{ 
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
                             marginBottom: '8px'
                           }}>
-                            <div style={{ 
+                            <div style={{
+                              fontSize: '11px',
+                              textTransform: 'uppercase',
+                              fontWeight: '600',
+                              color: '#0369a1',
                               display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                              marginBottom: '6px'
+                              gap: '8px',
+                              alignItems: 'center'
                             }}>
-                              <div style={{
-                                fontSize: '12px',
-                                textTransform: 'uppercase',
-                                fontWeight: '600',
-                                color: '#6b7280'
-                              }}>
-                                {question.category === 'sintoma' && '🔍 Síntoma'}
-                                {question.category === 'antecedente' && '📋 Antecedente'}
-                                {question.category === 'examen_fisico' && '👩‍⚕️ Examen'}
-                                {question.category === 'descarte' && '❌ Descarte'}
-                                {question.category === 'seguimiento' && '🔄 Seguimiento'}
-                                {!question.category && '💭 General'}
-                              </div>
-                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <span style={{ 
-                                  fontSize: '11px',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  background: question.priority === 'alta' ? '#dc2626' : 
-                                             question.priority === 'media' ? '#f59e0b' : '#10b981',
-                                  color: 'white',
-                                  fontWeight: '500'
-                                }}>
-                                  {(question.priority || 'BAJA').toUpperCase()}
-                                </span>
-                                {question.generated_at && (
-                                  <span style={{ 
-                                    fontSize: '10px',
-                                    color: '#9ca3af',
-                                    background: '#f3f4f6',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px'
-                                  }}>
-                                    {new Date(question.generated_at).toLocaleTimeString()}
-                                  </span>
-                                )}
-                              </div>
+                              {question.category === 'sintoma' && '🔍 Síntoma'}
+                              {question.category === 'antecedente' && '📋 Antecedente'}
+                              {question.category === 'examen_fisico' && '🩺 Examen Físico'}
+                              {question.category === 'descarte' && '❌ Descarte'}
+                              {question.category === 'seguimiento' && '📅 Seguimiento'}
                             </div>
-
-                            <div style={{ 
-                              fontSize: '14px',
-                              fontWeight: '500',
-                              marginBottom: '6px',
-                              color: '#374151',
-                              lineHeight: '1.4'
+                            <div style={{
+                              fontSize: '10px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              background: question.priority === 'alta' ? '#dc2626' : 
+                                         question.priority === 'media' ? '#d97706' : '#059669',
+                              color: 'white',
+                              fontWeight: '600'
                             }}>
-                              {question.question}
+                              {question.priority.toUpperCase()}
                             </div>
-
-                            {question.reasoning && (
-                              <div style={{ 
-                                fontSize: '12px', 
-                                color: '#6b7280',
-                                fontStyle: 'italic',
-                                lineHeight: '1.3',
-                                marginBottom: '4px'
-                              }}>
-                                {question.reasoning}
-                              </div>
-                            )}
-
-                            {question.target_diagnosis && (
-                              <div style={{
-                                fontSize: '11px',
-                                color: '#059669',
-                                background: '#d1fae5',
-                                padding: '3px 6px',
-                                borderRadius: '4px',
-                                display: 'inline-block'
-                              }}>
-                                Descarte: {question.target_diagnosis}
-                              </div>
-                            )}
-
-                            {question.analysis_id && (
-                              <div style={{
-                                fontSize: '10px',
-                                color: '#9ca3af',
-                                marginTop: '6px',
-                                fontFamily: 'monospace'
-                              }}>
-                                Análisis: {question.analysis_id.substring(0, 12)}...
-                              </div>
-                            )}
                           </div>
-                        ))}
-                      </div>
-                      
-                      {/* Estadísticas de preguntas */}
-                      <div style={{
-                        background: '#f0f9ff',
-                        border: '1px solid #0ea5e9',
-                        borderRadius: '6px',
-                        padding: '8px 12px',
-                        marginTop: '12px',
-                        fontSize: '12px',
-                        color: '#0369a1'
-                      }}>
-                        📊 Total: {selectedReport.suggested_questions.length} preguntas • 
-                        Análisis únicos: {new Set(selectedReport.suggested_questions.map(q => q.analysis_id).filter(Boolean)).size} • 
-                        Alta prioridad: {selectedReport.suggested_questions.filter(q => q.priority === 'alta').length}
-                      </div>
+                          
+                          <div style={{ 
+                            fontWeight: '600', 
+                            color: '#1f2937',
+                            marginBottom: '6px',
+                            lineHeight: '1.4'
+                          }}>
+                            {question.question}
+                          </div>
+                          
+                          <div style={{ 
+                            fontSize: '12px', 
+                            color: '#6b7280',
+                            fontStyle: 'italic',
+                            lineHeight: '1.3'
+                          }}>
+                            💡 {question.reasoning}
+                          </div>
+                          
+                          {question.target_diagnosis && (
+                            <div style={{ 
+                              fontSize: '11px', 
+                              color: '#7c3aed',
+                              marginTop: '4px',
+                              fontWeight: '500'
+                            }}>
+                              🎯 Objetivo: {question.target_diagnosis}
+                            </div>
+                          )}
+                          
+                          <div style={{
+                            fontSize: '10px',
+                            color: '#9ca3af',
+                            marginTop: '8px',
+                            textAlign: 'center'
+                          }}>
+                            💡 Haz clic para copiar la pregunta
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 

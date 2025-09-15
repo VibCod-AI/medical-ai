@@ -105,7 +105,7 @@ class DeepgramService {
         this.isConnected = false;
       });
 
-      this.connection.on(LiveTranscriptionEvents.Metadata, (data: unknown) => {
+      this.connection.on(LiveTranscriptionEvents.Metadata, () => {
         
         this.isConnected = false;
         this.stopKeepAlive();

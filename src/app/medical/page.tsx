@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ConnectionTest from '../../components/ConnectionTest';
 import AudioRecorder from '../../components/AudioRecorder';
@@ -8,7 +8,7 @@ import MedicalDashboard from '../../components/MedicalDashboard';
 import MedicalReports from '../../components/MedicalReports';
 import Navbar from '../../components/Navbar';
 
-export default function MedicalPage() {
+function MedicalPageContent() {
   const [activeSection, setActiveSection] = useState<'consultas' | 'configuracion' | 'reportes'>('consultas');
   const searchParams = useSearchParams();
 
@@ -164,5 +164,37 @@ export default function MedicalPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function MedicalPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        fontFamily: '"SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+        background: '#F5F5F7',
+        color: '#2C2C2E',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          padding: '2rem'
+        }}>
+          <div style={{
+            fontSize: '2rem',
+            marginBottom: '1rem'
+          }}>🏥</div>
+          <div style={{
+            fontSize: '1.2rem',
+            color: '#6C6C70'
+          }}>Cargando...</div>
+        </div>
+      </div>
+    }>
+      <MedicalPageContent />
+    </Suspense>
   );
 }
