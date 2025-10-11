@@ -80,14 +80,14 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
             lineHeight: '1.4',
             maxWidth: '32rem'
           }}>
-            Descubre cómo profesionales de la salud diagnostican más rápido, colaboran sin problemas, y atienden con confianza usando las potentes herramientas de IA de Medical AI
+            Descubre cómo profesionales de la salud diagnostican más rápido, colaboran sin problemas, y atienden con confianza usando las potentes herramientas de IA de Codal
           </p>
         </div>
         <button
           onClick={handleSignupClick}
           style={{
             padding: '0.5rem 1.875rem',
-            background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+            background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
             color: 'white',
             fontSize: '1rem',
             fontWeight: '500',
@@ -99,11 +99,11 @@ const CTASection: React.FC<CTASectionProps> = ({ onSignupClick }) => {
             transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
+            e.currentTarget.style.background = 'linear-gradient(135deg, #76afcf 0%, #4074a3 100%)'
             e.currentTarget.style.transform = 'translateY(-2px)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
+            e.currentTarget.style.background = 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)'
             e.currentTarget.style.transform = 'translateY(0)'
           }}
         >

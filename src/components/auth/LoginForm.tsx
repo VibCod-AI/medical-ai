@@ -96,14 +96,25 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
           display: 'inline-flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
+          gap: '16px',
           marginBottom: 'clamp(24px, 5vw, 32px)',
           textDecoration: 'none',
           fontSize: 'clamp(28px, 6vw, 36px)',
           fontWeight: '700',
-          color: '#2C2C2E',
+          color: '#4074a3',
           letterSpacing: '-0.5px'
         }}>
-          Medical AI
+          <img 
+            src="/doctors/Codalfinalelunico.png" 
+            alt="Codal Logo" 
+            style={{
+              width: 'clamp(56px, 12vw, 72px)',
+              height: 'clamp(44px, 10vw, 56px)',
+              borderRadius: '8px',
+              objectFit: 'cover'
+            }}
+          />
+          Codal
         </span>
 
         <h1 style={{
@@ -123,7 +134,7 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
           fontWeight: '400',
           margin: '0'
         }}>
-          Accede a tu cuenta para usar Medical AI
+          Accede a tu cuenta para usar Codal
         </p>
       </div>
 
@@ -180,7 +191,7 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
                 display: 'block'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#5B9CFF'
+                e.target.style.borderColor = '#4074a3'
                 e.target.style.background = 'rgba(91, 156, 255, 0.05)'
                 e.target.style.boxShadow = '0 0 0 4px rgba(91, 156, 255, 0.1)'
                 e.target.style.transform = 'translateY(-1px)'
@@ -227,7 +238,7 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
                 display: 'block'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#5B9CFF'
+                e.target.style.borderColor = '#4074a3'
                 e.target.style.background = 'rgba(91, 156, 255, 0.05)'
                 e.target.style.boxShadow = '0 0 0 4px rgba(91, 156, 255, 0.1)'
                 e.target.style.transform = 'translateY(-1px)'
@@ -249,8 +260,8 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
             style={{
               width: '100%',
               background: loading 
-                ? 'rgba(91, 156, 255, 0.5)' 
-                : '#5B9CFF',
+                ? 'rgba(64, 116, 163, 0.5)' 
+                : 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
               color: 'white',
               padding: '18px 24px',
               borderRadius: '20px',
@@ -268,14 +279,14 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
             }}
             onMouseOver={(e) => {
               if (!loading) {
-                e.currentTarget.style.background = '#4A90E2'
+                e.currentTarget.style.background = '#76afcf'
                 e.currentTarget.style.transform = 'translateY(-2px)'
                 e.currentTarget.style.boxShadow = '0 12px 35px rgba(91, 156, 255, 0.4)'
               }
             }}
             onMouseOut={(e) => {
               if (!loading) {
-                e.currentTarget.style.background = '#5B9CFF'
+                e.currentTarget.style.background = '#4074a3'
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = '0 8px 25px rgba(91, 156, 255, 0.3)'
               }
@@ -352,7 +363,7 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
           onMouseOver={(e) => {
             if (!loading) {
               e.currentTarget.style.background = 'rgba(255, 255, 255, 1)'
-              e.currentTarget.style.borderColor = '#5B9CFF'
+              e.currentTarget.style.borderColor = '#4074a3'
               e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.1)'
               e.currentTarget.style.transform = 'translateY(-1px)'
             }
@@ -386,7 +397,7 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
             <button
               onClick={onSwitchToSignUp}
               style={{
-                color: '#5B9CFF',
+                color: '#4074a3',
                 fontWeight: '600',
                 background: 'none',
                 border: 'none',
@@ -396,10 +407,10 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
                 transition: 'color 0.2s ease'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.color = '#4A90E2'
+                e.currentTarget.style.color = '#76afcf'
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.color = '#5B9CFF'
+                e.currentTarget.style.color = '#4074a3'
               }}
             >
               Regístrate aquí

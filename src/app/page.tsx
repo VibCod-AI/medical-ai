@@ -135,21 +135,6 @@ export default function HomePage() {
       minHeight: '100vh',
       position: 'relative'
     }}>
-      {/* Debug Info - TEMPORAL */}
-      <div style={{
-        position: 'fixed',
-        top: '60px',
-        right: '10px',
-        background: 'rgba(0,0,0,0.8)',
-        color: 'white',
-        padding: '10px',
-        borderRadius: '5px',
-        fontSize: '12px',
-        zIndex: 9999
-      }}>
-        Loading: {loading ? 'true' : 'false'}<br/>
-        User: {user ? 'exists' : 'null'}
-      </div>
 
       {/* Navigation - Estilo original flotante y redondeado */}
       <nav style={{
@@ -162,27 +147,68 @@ export default function HomePage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: 'white',
         borderRadius: '30px',
         border: '1px solid rgba(0, 0, 0, 0.15)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-        transition: 'all 0.3s ease'
+        transition: 'none !important'
       }}>
         <button
           onClick={() => scrollToSection('hero')}
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
             fontSize: '22px',
             fontWeight: '700',
-            color: '#1F2937',
-            background: 'none',
+            color: '#4074a3',
+            background: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            padding: 0
+            padding: 0,
+            transition: 'none !important',
+            transform: 'none !important',
+            filter: 'none !important',
+            opacity: '1 !important',
+            boxShadow: 'none !important'
+          }}
+          onMouseEnter={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.style.transition = 'none !important';
+            e.currentTarget.style.transform = 'none !important';
+            e.currentTarget.style.boxShadow = 'none !important';
+            e.currentTarget.style.filter = 'none !important';
+            e.currentTarget.style.background = 'transparent !important';
+            return false;
+          }}
+          onMouseLeave={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.style.transition = 'none !important';
+            e.currentTarget.style.transform = 'none !important';
+            e.currentTarget.style.boxShadow = 'none !important';
+            e.currentTarget.style.filter = 'none !important';
+            e.currentTarget.style.background = 'transparent !important';
+            return false;
           }}
         >
-          Medical AI
+          <img 
+            src="/doctors/Codalfinalelunico.png" 
+            alt="Codal Logo" 
+            style={{
+              width: '48px',
+              height: '38px',
+              borderRadius: '6px',
+              objectFit: 'cover',
+              transition: 'none !important',
+              transform: 'none !important',
+              boxShadow: 'none !important',
+              filter: 'none !important',
+              opacity: '1 !important'
+            }}
+          />
+          Codal
         </button>
         
         <div style={{
@@ -200,22 +226,15 @@ export default function HomePage() {
               fontSize: '15px', 
               fontWeight: '500',
               textShadow: 'none',
-              transition: 'all 0.2s ease',
+              transition: 'none !important',
+              transform: 'none !important',
               cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#1F2937'
-              e.currentTarget.style.fontWeight = '600'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#4B5563'
-              e.currentTarget.style.fontWeight = '500'
             }}>
-            Características
+            Cómo Funciona
           </button>
           
           <button
-            onClick={() => scrollToSection('how-it-works')}
+            onClick={() => scrollToSection('testimonials')}
             style={{ 
               color: '#4B5563', 
               background: 'none',
@@ -224,18 +243,11 @@ export default function HomePage() {
               fontSize: '15px', 
               fontWeight: '500',
               textShadow: 'none',
-              transition: 'all 0.2s ease',
+              transition: 'none !important',
+              transform: 'none !important',
               cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#1F2937'
-              e.currentTarget.style.fontWeight = '600'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#4B5563'
-              e.currentTarget.style.fontWeight = '500'
             }}>
-            Cómo Funciona
+            Testimonios
           </button>
           
           <button
@@ -248,44 +260,45 @@ export default function HomePage() {
               fontSize: '15px', 
               fontWeight: '500',
               textShadow: 'none',
-              transition: 'all 0.2s ease',
+              transition: 'none !important',
+              transform: 'none !important',
               cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#1F2937'
-              e.currentTarget.style.fontWeight = '600'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#4B5563'
-              e.currentTarget.style.fontWeight = '500'
             }}>
             Precios
+          </button>
+
+          <button
+            onClick={() => scrollToSection('faq')}
+            style={{ 
+              color: '#4B5563', 
+              background: 'none',
+              border: 'none',
+              textDecoration: 'none', 
+              fontSize: '15px', 
+              fontWeight: '500',
+              textShadow: 'none',
+              transition: 'none !important',
+              transform: 'none !important',
+              cursor: 'pointer'
+            }}>
+            FAQ
           </button>
 
           {/* Login Button */}
           <button
             onClick={handleLoginClick}
             style={{
-              background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
-              color: '#111827',
+              background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
+              color: 'white',
               border: 'none',
               padding: '0.75rem 1.5rem',
               borderRadius: '20px',
               fontSize: '15px',
               fontWeight: '600',
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              transition: 'none !important',
+              transform: 'none !important',
               boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
-              e.currentTarget.style.transform = 'translateY(-1px)'
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
             }}
           >
             Iniciar Sesión
@@ -307,7 +320,78 @@ export default function HomePage() {
         <FooterSection onScrollToSection={scrollToSection} />
       </main>
 
-      <style jsx>{`
+      <style jsx global>{`
+        nav button,
+        nav button *,
+        nav a,
+        nav a *,
+        footer button,
+        footer button *,
+        footer a,
+        footer a * {
+          transition: none !important;
+          transform: none !important;
+          animation: none !important;
+        }
+        nav button:hover,
+        nav button:hover *,
+        nav a:hover,
+        nav a:hover *,
+        footer button:hover,
+        footer button:hover *,
+        footer a:hover,
+        footer a:hover * {
+          transition: none !important;
+          transform: none !important;
+          animation: none !important;
+          box-shadow: inherit !important;
+        }
+        nav button:first-child,
+        nav button:first-child *,
+        nav button:first-child img {
+          transition: none !important;
+          transform: none !important;
+          animation: none !important;
+          box-shadow: none !important;
+          filter: none !important;
+        }
+        nav button:first-child {
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+        nav button:first-child:hover,
+        nav button:first-child:hover *,
+        nav button:first-child:hover img {
+          transition: none !important;
+          transform: none !important;
+          animation: none !important;
+          filter: none !important;
+          opacity: 1 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+        button[onclick*="scrollToSection('hero')"],
+        button[onclick*="scrollToSection('hero')"] *,
+        button[onclick*="scrollToSection('hero')"] img {
+          transition: none !important;
+          transform: none !important;
+          animation: none !important;
+          filter: none !important;
+          opacity: 1 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+        button[onclick*="scrollToSection('hero')"]:hover,
+        button[onclick*="scrollToSection('hero')"]:hover *,
+        button[onclick*="scrollToSection('hero')"]:hover img {
+          transition: none !important;
+          transform: none !important;
+          animation: none !important;
+          filter: none !important;
+          opacity: 1 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }

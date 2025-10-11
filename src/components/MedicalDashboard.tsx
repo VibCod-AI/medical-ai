@@ -601,7 +601,7 @@ const MedicalDashboard: React.FC = () => {
                 onClick={startSession}
                 disabled={!isConnected}
                 style={{
-                  background: isConnected ? 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)' : 'rgba(108, 108, 112, 0.5)',
+                  background: isConnected ? 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)' : 'rgba(108, 108, 112, 0.5)',
                   color: 'white',
                   border: 'none',
                   padding: '12px 24px',
@@ -1076,7 +1076,7 @@ const MedicalDashboard: React.FC = () => {
             }}>
               
               {/* Red Flags */}
-              {currentAnalysis.red_flags.length > 0 && (
+              {currentAnalysis && currentAnalysis.red_flags && currentAnalysis.red_flags.length > 0 && (
                 <div style={{
                   background: '#fef2f2',
                   border: '1px solid #fecaca',
@@ -1109,7 +1109,7 @@ const MedicalDashboard: React.FC = () => {
               )}
 
               {/* Síntomas */}
-              {currentAnalysis.symptoms.length > 0 && (
+              {currentAnalysis && currentAnalysis.symptoms && currentAnalysis.symptoms.length > 0 && (
                 <div style={{ marginBottom: '20px' }}>
                   <h3 style={{ 
                     margin: '0 0 12px 0', 
@@ -1157,7 +1157,7 @@ const MedicalDashboard: React.FC = () => {
               )}
 
               {/* Diagnósticos */}
-              {currentAnalysis.diagnoses.length > 0 && (
+              {currentAnalysis && currentAnalysis.diagnoses && currentAnalysis.diagnoses.length > 0 && (
                 <div style={{ marginBottom: '20px' }}>
                   <h3 style={{ 
                     margin: '0 0 12px 0', 
@@ -1214,7 +1214,7 @@ const MedicalDashboard: React.FC = () => {
               )}
 
               {/* Recomendaciones */}
-              {currentAnalysis.recommendations.length > 0 && (
+              {currentAnalysis && currentAnalysis.recommendations && currentAnalysis.recommendations.length > 0 && (
                 <div style={{ marginBottom: '20px' }}>
                   <h3 style={{ 
                     margin: '0 0 12px 0', 

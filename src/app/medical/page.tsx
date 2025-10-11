@@ -51,21 +51,32 @@ export default function MedicalPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: 'white',
         borderRadius: '30px',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
+        border: '1px solid rgba(0, 0, 0, 0.1)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        transition: 'all 0.3s ease'
+        transition: 'none !important'
       }}>
         {/* Logo */}
         <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
           fontSize: '22px',
           fontWeight: '700',
-          color: '#2C2C2E'
+          color: '#4074a3'
         }}>
-          Medical AI
+          <img 
+            src="/doctors/Codalfinalelunico.png" 
+            alt="Codal Logo" 
+            style={{
+              width: '48px',
+              height: '38px',
+              borderRadius: '6px',
+              objectFit: 'cover'
+            }}
+          />
+          Codal
         </div>
         
         <div style={{
@@ -81,16 +92,14 @@ export default function MedicalPage() {
               fontSize: '15px', 
               fontWeight: '500',
               textShadow: 'none',
-              transition: 'all 0.2s ease',
+              transition: 'none !important',
               cursor: 'pointer'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#2C2C2E'
-              e.currentTarget.style.fontWeight = '600'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = '#6C6C70'
-              e.currentTarget.style.fontWeight = '500'
             }}
           >
             Dashboard
@@ -114,16 +123,14 @@ export default function MedicalPage() {
               fontSize: '15px', 
               fontWeight: '500',
               textShadow: 'none',
-              transition: 'all 0.2s ease',
+              transition: 'none !important',
               cursor: 'pointer'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#2C2C2E'
-              e.currentTarget.style.fontWeight = '600'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = '#6C6C70'
-              e.currentTarget.style.fontWeight = '500'
             }}
           >
             Reportes
@@ -151,7 +158,7 @@ export default function MedicalPage() {
               onClick={handleSignOut}
               disabled={isSigningOut || authLoading}
               style={{
-                background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+                background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
                 color: 'white',
                 border: 'none',
                 padding: '0.75rem 1.5rem',
@@ -159,16 +166,16 @@ export default function MedicalPage() {
                 fontSize: '15px',
                 fontWeight: '600',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'none !important',
                 boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
+                e.currentTarget.style.background = 'linear-gradient(135deg, #76afcf 0%, #4074a3 100%)'
                 e.currentTarget.style.transform = 'translateY(-1px)'
                 e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
+                e.currentTarget.style.background = 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)'
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
               }}

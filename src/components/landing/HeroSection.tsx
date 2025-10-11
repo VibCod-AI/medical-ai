@@ -47,7 +47,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
           Revoluciona las
           <br />
           <span style={{
-            background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+            background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
@@ -78,8 +78,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
           <button
             onClick={handleGetStartedClick}
             style={{
-              background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
-              color: '#111827',
+              background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
+              color: 'white',
               border: 'none',
               padding: '1rem 2.5rem',
               borderRadius: '25px',
@@ -90,12 +90,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
               boxShadow: '0 8px 25px rgba(91, 156, 255, 0.3)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
+              e.currentTarget.style.background = 'linear-gradient(135deg, #76afcf 0%, #4074a3 100%)'
               e.currentTarget.style.transform = 'translateY(-3px)'
               e.currentTarget.style.boxShadow = '0 12px 35px rgba(91, 156, 255, 0.4)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
+              e.currentTarget.style.background = 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)'
               e.currentTarget.style.transform = 'translateY(0)'
               e.currentTarget.style.boxShadow = '0 8px 25px rgba(91, 156, 255, 0.3)'
             }}
@@ -106,8 +106,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
           <button
             style={{
               background: 'rgba(91, 156, 255, 0.1)',
-              color: '#5B9CFF',
-              border: '2px solid #5B9CFF',
+              color: '#4074a3',
+              border: '2px solid #4074a3',
               padding: '1rem 2.5rem',
               borderRadius: '25px',
               fontSize: '1.125rem',
@@ -117,13 +117,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
               boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#5B9CFF'
+              e.currentTarget.style.background = '#4074a3'
               e.currentTarget.style.color = 'white'
               e.currentTarget.style.transform = 'translateY(-3px)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'rgba(91, 156, 255, 0.1)'
-              e.currentTarget.style.color = '#5B9CFF'
+              e.currentTarget.style.color = '#4074a3'
               e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
@@ -151,7 +151,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
             <div style={{
               fontSize: '2rem',
               fontWeight: '700',
-              color: '#5B9CFF',
+              color: '#4074a3',
               marginBottom: '0.5rem'
             }}>
               97.3%
@@ -177,7 +177,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
             <div style={{
               fontSize: '2rem',
               fontWeight: '700',
-              color: '#5B9CFF',
+              color: '#4074a3',
               marginBottom: '0.5rem'
             }}>
               24/7
@@ -203,7 +203,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStartedClick }) => {
             <div style={{
               fontSize: '2rem',
               fontWeight: '700',
-              color: '#5B9CFF',
+              color: '#4074a3',
               marginBottom: '0.5rem'
             }}>
               &lt;3s

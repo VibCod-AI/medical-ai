@@ -120,11 +120,6 @@ export const BackButton: React.FC<BackButtonProps> = ({
     outline: 'none',
     border: 'none',
     
-    ':focus-visible': {
-      outline: `2px solid ${designTokens.colors.primary[500]}`,
-      outlineOffset: '2px'
-    },
-    
     ...positionStyles,
     ...variantStyles,
     ...sizeStyles
@@ -162,6 +157,14 @@ export const BackButton: React.FC<BackButtonProps> = ({
         
         const arrow = e.currentTarget.querySelector('.back-arrow-icon') as HTMLElement;
         if (arrow) arrow.style.transform = 'translateX(0)';
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.outline = `2px solid ${designTokens.colors.primary[500]}`;
+        e.currentTarget.style.outlineOffset = '2px';
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.outline = 'none';
+        e.currentTarget.style.outlineOffset = '0';
       }}
       aria-label={`${label} - Navegar hacia atrás`}
     >

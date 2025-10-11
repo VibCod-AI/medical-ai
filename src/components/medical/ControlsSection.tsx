@@ -50,7 +50,7 @@ const ControlsSection: React.FC<ControlsSectionProps> = ({
               onClick={onStartSession}
               disabled={!isConnected}
               style={{
-                background: isConnected ? 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)' : 'rgba(108, 108, 112, 0.5)',
+                background: isConnected ? 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)' : 'rgba(108, 108, 112, 0.5)',
                 color: 'white',
                 border: 'none',
                 padding: '12px 24px',

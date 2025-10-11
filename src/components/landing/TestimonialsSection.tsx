@@ -33,7 +33,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         borderRadius: '10px',
         boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
         padding: '1.5rem',
-        background: isGlassCard ? 'rgba(231, 236, 235, 0.12)' : 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+        background: isGlassCard ? 'rgba(231, 236, 235, 0.12)' : 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
         position: 'relative'
       }}>
         <div style={{
@@ -205,14 +205,14 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
 const TestimonialsSection: React.FC = () => {
   const testimonials = [
     {
-      quote: "Medical AI ha transformado completamente nuestra práctica. Las transcripciones en tiempo real son tan precisas que se sienten como tener un asistente médico especializado revisando cada consulta mientras hablas.",
+      quote: "Codal ha transformado completamente nuestra práctica. Las transcripciones en tiempo real son tan precisas que se sienten como tener un asistente médico especializado revisando cada consulta mientras hablas.",
       doctorName: "Dr. Ana Martínez",
       hospital: "Hospital General",
       imageUrl: "/doctors/image.png",
       isLarge: true
     },
     {
-      quote: "Integrar Medical AI en nuestro hospital fue sencillo, y las conexiones con nuestros sistemas existentes nos ahorraron semanas de configuración",
+      quote: "Integrar Codal en nuestro hospital fue sencillo, y las conexiones con nuestros sistemas existentes nos ahorraron semanas de configuración",
       doctorName: "Dr. Carlos Ruiz",
       hospital: "Clínica San Rafael",
       imageUrl: "/doctors/image copy.png"
@@ -224,25 +224,25 @@ const TestimonialsSection: React.FC = () => {
       imageUrl: "/doctors/image copy 2.png"
     },
     {
-      quote: "Ya no hacemos malabares con múltiples herramientas. Medical AI integró todas nuestras aplicaciones médicas en un solo lugar.",
+      quote: "Ya no hacemos malabares con múltiples herramientas. Codal integró todas nuestras aplicaciones médicas en un solo lugar.",
       doctorName: "Dr. Roberto Silva",
       hospital: "Hospital Universitario",
       imageUrl: "/doctors/image copy 3.png"
     },
     {
-      quote: "Comenzamos con el plan gratuito solo para probarlo, pero en una semana upgradeamos a Pro. Ahora no podemos imaginar trabajar sin Medical AI",
+      quote: "Comenzamos con el plan gratuito solo para probarlo, pero en una semana upgradeamos a Pro. Ahora no podemos imaginar trabajar sin Codal",
       doctorName: "Dra. Carmen Vega",
       hospital: "Medicina Familiar",
       imageUrl: "/doctors/image copy 4.png"
     },
     {
-      quote: "Las consultas colaborativas se sienten naturales ahora. Con las transcripciones en tiempo real de Medical AI, la telemedicina se volvió más productiva.",
+      quote: "Las consultas colaborativas se sienten naturales ahora. Con las transcripciones en tiempo real de Codal, la telemedicina se volvió más productiva.",
       doctorName: "Dr. Luis Fernández",
       hospital: "Telemedicina Plus",
       imageUrl: "/doctors/image copy 5.png"
     },
     {
-      quote: "Implementar Medical AI en nuestro centro de diagnóstico no solo fue simple, se sintió perfecto. Fuimos de las consultas tradicionales a ver análisis de IA en vivo en minutos sin problemas de configuración.",
+      quote: "Implementar Codal en nuestro centro de diagnóstico no solo fue simple, se sintió perfecto. Fuimos de las consultas tradicionales a ver análisis de IA en vivo en minutos sin problemas de configuración.",
       doctorName: "Dr. Alberto Flores",
       hospital: "Centro de Diagnóstico Avanzado",
       imageUrl: "/doctors/image copy 6.png",
@@ -295,7 +295,7 @@ const TestimonialsSection: React.FC = () => {
           }}>
             Descubre cómo profesionales de la salud diagnostican más rápido, colaboran sin problemas,
             <br />
-            y atienden con confianza usando las potentes herramientas de IA de Medical AI
+            y atienden con confianza usando las potentes herramientas de IA de Codal
           </p>
         </div>
       </div>

@@ -58,7 +58,7 @@ export default function Dashboard() {
             width: '60px',
             height: '60px',
             border: '4px solid rgba(91, 156, 255, 0.2)',
-            borderTop: '4px solid #5B9CFF',
+            borderTop: '4px solid #4074a3',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 1.5rem'
@@ -100,7 +100,7 @@ export default function Dashboard() {
           width: '60px',
           height: '60px',
           border: '4px solid rgba(91, 156, 255, 0.2)',
-          borderTop: '4px solid #5B9CFF',
+          borderTop: '4px solid #4074a3',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }}></div>

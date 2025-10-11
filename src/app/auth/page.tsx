@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import LoginForm from '@/components/auth/LoginForm'
 import SignUpForm from '@/components/auth/SignUpForm'
-import { BackButton } from '@/design-system'
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -20,14 +19,48 @@ export default function AuthPage() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Botón de Volver Elegante */}
-      <BackButton 
-        to="/" 
-        label="Volver al Inicio"
-        variant="glass"
-        size="md"
-        position="top-left"
-      />
+      {/* Botón Volver */}
+      <button
+        onClick={() => window.location.href = '/'}
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '2rem',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          fontSize: '14px',
+          fontWeight: '500',
+          color: '#4074a3',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'white';
+          e.currentTarget.style.transform = 'translateY(-1px)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M19 12H5"/>
+          <path d="M12 19l-7-7 7-7"/>
+        </svg>
+        Volver al Inicio
+      </button>
+      
       {/* Background decorations */}
       <div style={{
         position: 'absolute',

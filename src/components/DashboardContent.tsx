@@ -58,7 +58,7 @@ export default function DashboardContent() {
           width: '80px',
           height: '80px',
           border: '4px solid rgba(91, 156, 255, 0.2)',
-          borderTop: '4px solid #5B9CFF',
+          borderTop: '4px solid #4074a3',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }}></div>
@@ -87,7 +87,7 @@ export default function DashboardContent() {
              background: 'linear-gradient(135deg, rgba(135, 206, 235, 0.05) 0%, rgba(176, 224, 230, 0.05) 50%, rgba(173, 216, 230, 0.05) 100%)'
            }} />
 
-      {/* Navigation */}
+      {/* Modern Navigation */}
       <nav style={{
         position: 'fixed',
         top: '1rem',
@@ -98,53 +98,138 @@ export default function DashboardContent() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: 'white',
         borderRadius: '30px',
-        border: '1px solid rgba(0, 0, 0, 0.15)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-        transition: 'all 0.3s ease'
+        border: '1px solid rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        transition: 'none !important'
       }}>
+        {/* Logo */}
         <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
           fontSize: '22px',
           fontWeight: '700',
-          color: '#1F2937'
+          color: '#4074a3'
         }}>
-          Medical AI
+          <img 
+            src="/doctors/Codalfinalelunico.png" 
+            alt="Codal Logo" 
+            style={{
+              width: '48px',
+              height: '38px',
+              borderRadius: '6px',
+              objectFit: 'cover'
+            }}
+          />
+          Codal
         </div>
         
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem'
+          gap: '2.5rem'
         }}>
-          <span style={{
-            color: '#6B7280',
-            fontSize: '14px'
+          <span style={{ 
+            color: '#2C2C2E', 
+            textDecoration: 'none', 
+            fontSize: '15px', 
+            fontWeight: '700',
+            textShadow: 'none',
           }}>
-            {user?.email}
+            Dashboard
           </span>
           
-          <button
-            onClick={handleSignOut}
-            disabled={isSigningOut}
-            style={{
-              background: isSigningOut ? 'rgba(239, 68, 68, 0.8)' : 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-              color: 'white',
-              border: 'none',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '20px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: isSigningOut ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 14px rgba(239, 68, 68, 0.3)',
-              opacity: isSigningOut ? 0.7 : 1
+          <span
+            onClick={() => router.push('/medical')}
+            style={{ 
+              color: '#6C6C70', 
+              textDecoration: 'none', 
+              fontSize: '15px', 
+              fontWeight: '500',
+              textShadow: 'none',
+              transition: 'none !important',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#2C2C2E'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#6C6C70'
             }}
           >
-            {isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}
-          </button>
+            Consultas
+          </span>
+          
+          <a 
+            href="#reports" 
+            style={{ 
+              color: '#6C6C70', 
+              textDecoration: 'none', 
+              fontSize: '15px', 
+              fontWeight: '500',
+              textShadow: 'none',
+              transition: 'none !important',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#2C2C2E'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#6C6C70'
+            }}
+          >
+            Reportes
+          </a>
+
+          {/* User Profile Section */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            marginLeft: '1rem',
+            paddingLeft: '1rem',
+            borderLeft: '1px solid rgba(255, 255, 255, 0.3)'
+          }}>
+            <div style={{
+              color: '#2C2C2E',
+              fontSize: '14px',
+              fontWeight: '500',
+              textShadow: 'none'
+            }}>
+              {profile?.full_name || user?.email || 'Usuario'}
+            </div>
+            
+            <button
+              onClick={handleSignOut}
+              disabled={isSigningOut || authLoading}
+              style={{
+                background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '20px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'none !important',
+                boxShadow: '0 4px 14px rgba(91, 156, 255, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #76afcf 0%, #4074a3 100%)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(91, 156, 255, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(91, 156, 255, 0.3)'
+              }}
+            >
+              {isSigningOut ? 'Cerrando...' : 'Cerrar Sesión'}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -179,7 +264,7 @@ export default function DashboardContent() {
               borderRadius: '9999px',
               border: '1px solid rgba(91, 156, 255, 0.3)',
               background: 'rgba(91, 156, 255, 0.1)',
-              color: '#5B9CFF',
+              color: '#4074a3',
               fontSize: '0.875rem',
               fontWeight: '500',
               width: 'fit-content'
@@ -203,7 +288,7 @@ export default function DashboardContent() {
               }}>
                 Tu asistente{' '}
                 <span style={{
-                  background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 50%, #A7CEFF 100%)',
+                  background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 50%, #c3e5f3 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent'
                 }}>
@@ -236,7 +321,7 @@ export default function DashboardContent() {
                 <button
                   onClick={() => router.push('/medical')}
                   style={{
-                    background: 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)',
+                    background: 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)',
                     color: 'white',
                     border: 'none',
                     padding: '1rem 2rem',
@@ -251,11 +336,11 @@ export default function DashboardContent() {
                     boxShadow: '0 10px 40px rgba(91, 156, 255, 0.3)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)'
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #76afcf 0%, #4074a3 100%)'
                     e.currentTarget.style.transform = 'translateY(-2px)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #5B9CFF 0%, #4A90E2 100%)'
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #4074a3 0%, #76afcf 100%)'
                     e.currentTarget.style.transform = 'translateY(0)'
                   }}
                 >
@@ -354,7 +439,7 @@ export default function DashboardContent() {
                   right: '-1rem',
                   width: '12px',
                   height: '12px',
-                  background: '#5B9CFF',
+                  background: '#4074a3',
                   borderRadius: '50%',
                   animation: 'bounce 2s infinite',
                   animationDelay: '0s'
@@ -367,7 +452,7 @@ export default function DashboardContent() {
                   left: '-1.5rem',
                   width: '8px',
                   height: '8px',
-                  background: '#4A90E2',
+                  background: '#76afcf',
                   borderRadius: '50%',
                   animation: 'bounce 2s infinite',
                   animationDelay: '1s'
@@ -380,7 +465,7 @@ export default function DashboardContent() {
                   right: '-2rem',
                   width: '16px',
                   height: '16px',
-                  background: '#A7CEFF',
+                  background: '#c3e5f3',
                   borderRadius: '50%',
                   animation: 'bounce 2s infinite',
                   animationDelay: '2s'

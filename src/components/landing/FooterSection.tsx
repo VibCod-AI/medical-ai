@@ -52,18 +52,38 @@ const FooterSection: React.FC<FooterSectionProps> = ({ onScrollToSection }) => {
           <button
             onClick={() => scrollToSection('hero')}
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
               textAlign: 'center',
-              color: '#111827',
+              color: '#4074a3',
               fontSize: '1.25rem',
               fontWeight: '600',
               lineHeight: '1',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              padding: 0
+              padding: 0,
+              transition: 'none !important',
+              transform: 'none !important'
             }}
+            onMouseEnter={() => {}}
+            onMouseLeave={() => {}}
           >
-            Medical AI
+            <img 
+              src="/doctors/Codalfinalelunico.png" 
+              alt="Codal Logo" 
+            style={{
+              width: '42px',
+              height: '34px',
+              borderRadius: '6px',
+              objectFit: 'cover',
+              transition: 'none !important',
+              transform: 'none !important'
+            }}
+            />
+            Codal
           </button>
         </div>
         <p style={{
@@ -143,7 +163,9 @@ const FooterSection: React.FC<FooterSectionProps> = ({ onScrollToSection }) => {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: 0
+                padding: 0,
+                transition: 'none !important',
+                transform: 'none !important'
               }}>
               Características
             </button>
@@ -158,7 +180,9 @@ const FooterSection: React.FC<FooterSectionProps> = ({ onScrollToSection }) => {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: 0
+                padding: 0,
+                transition: 'none !important',
+                transform: 'none !important'
               }}>
               Cómo Funciona
             </button>
@@ -173,7 +197,9 @@ const FooterSection: React.FC<FooterSectionProps> = ({ onScrollToSection }) => {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: 0
+                padding: 0,
+                transition: 'none !important',
+                transform: 'none !important'
               }}>
               Precios
             </button>
@@ -188,7 +214,9 @@ const FooterSection: React.FC<FooterSectionProps> = ({ onScrollToSection }) => {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: 0
+                padding: 0,
+                transition: 'none !important',
+                transform: 'none !important'
               }}>
               FAQ
             </button>

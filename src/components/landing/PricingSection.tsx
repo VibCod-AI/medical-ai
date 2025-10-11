@@ -178,9 +178,6 @@ const PricingPlan: React.FC<PricingPlanProps> = ({
                   transition: 'transform 0.2s ease-in-out'
                 }} />
               </button>
-              <span style={{ fontSize: '0.875rem', color: '#9CA3AF' }}>
-                Configuración rápida (5 días)
-              </span>
             </div>
           </div>
         </div>
@@ -337,9 +334,6 @@ const PricingPlan: React.FC<PricingPlanProps> = ({
                 transition: 'transform 0.2s ease-in-out'
               }} />
             </button>
-            <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>
-              Configuración rápida (5 días)
-            </span>
           </div>
         </div>
       </div>

@@ -108,16 +108,16 @@ const FAQSection: React.FC = () => {
   
   const faqData: FAQData[] = [
     {
-      question: "¿Qué es Medical AI y para quién está diseñado?",
-      answer: "Medical AI es una plataforma de IA médica diseñada para médicos, equipos de salud y organizaciones que buscan acelerar su flujo de trabajo clínico. Es perfecto tanto para médicos individuales que buscan mejorar su productividad como para equipos que necesitan herramientas de colaboración eficientes."
+      question: "¿Qué es Codal y para quién está diseñado?",
+      answer: "Codal es una plataforma de IA médica diseñada para médicos, equipos de salud y organizaciones que buscan acelerar su flujo de trabajo clínico. Es perfecto tanto para médicos individuales que buscan mejorar su productividad como para equipos que necesitan herramientas de colaboración eficientes."
     },
     {
       question: "¿Cómo funciona el análisis médico con IA?",
       answer: "Nuestra IA analiza las consultas en tiempo real, proporcionando sugerencias inteligentes para diagnósticos, detectando posibles complicaciones y asegurando las mejores prácticas. Aprende de tus patrones clínicos y se adapta a los estándares de tu equipo médico."
     },
     {
-      question: "¿Puedo integrar Medical AI con mis herramientas existentes?",
-      answer: "¡Sí! Medical AI ofrece integraciones con sistemas populares de historias clínicas, laboratorios, sistemas hospitalarios y muchos más. Nuestra conectividad permite gestionar fácilmente el acceso a servidores en todo tu stack de salud."
+      question: "¿Puedo integrar Codal con mis herramientas existentes?",
+      answer: "¡Sí! Codal ofrece integraciones con sistemas populares de historias clínicas, laboratorios, sistemas hospitalarios y muchos más. Nuestra conectividad permite gestionar fácilmente el acceso a servidores en todo tu stack de salud."
     },
     {
       question: "¿Qué incluye el plan gratuito?",
@@ -128,7 +128,7 @@ const FAQSection: React.FC = () => {
       answer: "Nuestras transcripciones en tiempo real pueden procesar múltiples consultas simultáneamente, convirtiendo conversaciones médicas complejas en texto estructurado más rápido que los métodos tradicionales de documentación manual."
     },
     {
-      question: "¿Mis datos médicos están seguros con Medical AI?",
+      question: "¿Mis datos médicos están seguros con Codal?",
       answer: "Absolutamente. Utilizamos medidas de seguridad de nivel empresarial incluyendo encriptación de extremo a extremo, transmisión segura de datos y cumplimiento con estándares de la industria como HIPAA. Tus datos nunca salen de tu entorno seguro sin tu permiso explícito."
     }
   ];
@@ -207,7 +207,7 @@ const FAQSection: React.FC = () => {
             lineHeight: '18.20px',
             wordBreak: 'break-word'
           }}>
-            Todo lo que necesitas saber sobre Medical AI y cómo puede transformar tu práctica médica
+            Todo lo que necesitas saber sobre Codal y cómo puede transformar tu práctica médica
           </p>
         </div>
       </div>
