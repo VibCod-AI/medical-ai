@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import LoginForm from '@/components/auth/LoginForm'
 import SignUpForm from '@/components/auth/SignUpForm'
+import { BackButton } from '@/design-system'
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -19,6 +20,14 @@ export default function AuthPage() {
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {/* Botón de Volver Elegante */}
+      <BackButton 
+        to="/" 
+        label="Volver al Inicio"
+        variant="glass"
+        size="md"
+        position="top-left"
+      />
       {/* Background decorations */}
       <div style={{
         position: 'absolute',
