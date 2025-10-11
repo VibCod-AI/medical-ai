@@ -40,6 +40,8 @@ export interface DeepgramConfig {
   encoding?: string;
   filler_words?: boolean;
   profanity_filter?: boolean;
+  utterances?: boolean;
+  utt_split?: number;
 }
 
 export interface TranscriptionResult {

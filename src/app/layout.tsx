@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import Plasma from "@/components/plasma";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,8 +46,24 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <div style={{ 
-            minHeight: '100vh',
-            background: '#f8fafc'
+            position: 'fixed',
+            inset: '0',
+            zIndex: 0,
+            background: 'white'
+          }}>
+            <Plasma
+              color="#DBEAFE"
+              speed={0.8}
+              direction="forward"
+              scale={1.5}
+              opacity={0.4}
+              mouseInteractive={true}
+            />
+          </div>
+          <div style={{ 
+            position: 'relative',
+            zIndex: 10,
+            minHeight: '100vh'
           }}>
             {children}
           </div>

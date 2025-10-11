@@ -1,19 +1,28 @@
 import { NextResponse } from 'next/server';
-import OpenAIService from '../../../lib/services/openaiService';
 
-// Instancia global del servicio OpenAI
-let openaiService: OpenAIService | null = null;
-
-function getOpenAIService(): OpenAIService {
-  if (!openaiService) {
-    openaiService = new OpenAIService();
-  }
-  return openaiService;
+// Función para obtener la instancia global de OpenAI desde el servidor
+function getGlobalOpenAIService() {
+  // Acceder a la instancia global del servidor
+  const globalThis = global as any;
+  console.log('🔍 API: Buscando instancia global OpenAI:', {
+    hasGlobalThis: !!globalThis,
+    hasOpenaiService: !!globalThis.openaiService,
+    globalKeys: Object.keys(globalThis).filter(k => k.includes('openai'))
+  });
+  return globalThis.openaiService || null;
 }
 
 export async function GET() {
   try {
-    const service = getOpenAIService();
+    const service = getGlobalOpenAIService();
+    
+    if (!service) {
+      return NextResponse.json({
+        status: 'error',
+        message: 'Servicio OpenAI no disponible'
+      }, { status: 503 });
+    }
+    
     const analysis = service.getLatestAnalysis();
     const stats = service.getStats();
     
@@ -38,16 +47,27 @@ export async function GET() {
 
 export async function POST() {
   try {
-    const service = getOpenAIService();
+    const service = getGlobalOpenAIService();
+    
+    if (!service) {
+      return NextResponse.json({
+        status: 'error',
+        message: 'Servicio OpenAI no disponible - servidor no iniciado'
+      }, { status: 503 });
+    }
+    
+    console.log('🧪 API: Forzando análisis médico desde endpoint...');
     const analysis = await service.generateMedicalAnalysis();
     
     if (analysis) {
+      console.log('✅ API: Análisis generado exitosamente');
       return NextResponse.json({
         status: 'success',
         analysis,
         timestamp: new Date().toISOString()
       });
     } else {
+      console.log('❌ API: No se pudo generar análisis');
       return NextResponse.json({
         status: 'error',
         message: 'No hay suficientes datos para generar análisis'
@@ -55,7 +75,7 @@ export async function POST() {
     }
 
   } catch (error) {
-    console.error('Error generating medical analysis:', error);
+    console.error('❌ API: Error generating medical analysis:', error);
     return NextResponse.json(
       { 
         status: 'error',

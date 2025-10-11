@@ -31,12 +31,10 @@ const MedicalDashboard: React.FC = () => {
     // Conectar a WebSocket
     const connectSocket = async () => {
       try {
-        console.log('🔄 MedicalDashboard: Intentando conectar WebSocket...');
         const connected = await socketService.connect();
-        console.log('🔌 MedicalDashboard: Conexión WebSocket:', connected ? 'EXITOSA' : 'FALLIDA');
         setIsConnected(connected);
       } catch (error) {
-        console.error('❌ MedicalDashboard: Error conectando WebSocket:', error);
+        console.error('Error conectando WebSocket:', error);
         setIsConnected(false);
       }
     };
@@ -67,144 +65,30 @@ const MedicalDashboard: React.FC = () => {
         speaker: number;
         confidence: number;
       };
+      console.log('🎧 RECIBIDO transcription-update:', transcription);
       
-      // Filtros básicos para transcripciones válidas
-      if (!transcription.is_final || !transcription.transcript?.trim()) {
-        return;
-      }
-      
-      // Detectar transcripciones mockeadas por patrones sospechosos
-      const mockPatterns = [
-        'Hola doctor, buenos días',
-        'Buenos días, ¿cómo se encuentra hoy?',
-        'Me duele un poco la cabeza',
-        'Entiendo, ¿desde cuándo tiene este dolor?',
-        'Vamos a revisar sus síntomas'
-      ];
-      
-      const isMockPattern = mockPatterns.some(pattern => 
-        transcription.transcript.includes(pattern)
-      );
-      
-      if (isMockPattern) {
-        console.warn('🚫 Transcripción mockeada rechazada:', transcription.transcript);
-        return;
-      }
-      
-      console.log('✅ Transcripción recibida:', transcription.transcript.substring(0, 50) + '...');
-      
-      // Detectar speaker inteligentemente basándose en el contenido
-      const detectSpeaker = (text: string, speakerNumber: number, previousTranscriptions: Transcription[]): 'medico' | 'paciente' => {
-        const lowerText = text.toLowerCase();
-        
-        // Frases MUY específicas del médico
-        const strongDoctorPhrases = [
-          'mi nombre es', 'soy el doctor', 'soy la doctora', 'acompañando en tu consulta',
-          'cuáles son los síntomas que te traen', 'podrías por favor describir',
-          'vamos a revisar', 'necesito que me digas', 'dime cuáles son los síntomas'
-        ];
-        
-        // Frases MUY específicas del paciente
-        const strongPatientPhrases = [
-          'hola doctor', 'buenos días doctor', 'vengo porque', 'he estado sintiendo',
-          'me duele', 'siento un dolor', 'tengo dolor', 'he notado que'
-        ];
-        
-        // Frases de preguntas médicas
-        const medicalQuestions = [
-          'desde cuándo', 'cómo se siente', 'qué tipo de dolor', 'se acompaña',
-          'has notado', 'tienes algún', 'sientes que', 'podrías describir'
-        ];
-        
-        // Frases de síntomas/respuestas de paciente
-        const symptomDescriptions = [
-          'se siente como', 'es una presión', 'dolor constante', 'me pasa que',
-          'últimamente', 'desde hace', 'cuando tengo', 'me da', 'también noto',
-          'he notado', 'siento que', 'no he notado', 'claro con gusto', 'el dolor se siente'
-        ];
-        
-        const hasStrongDoctor = strongDoctorPhrases.some(phrase => lowerText.includes(phrase));
-        const hasStrongPatient = strongPatientPhrases.some(phrase => lowerText.includes(phrase));
-        const hasMedicalQuestion = medicalQuestions.some(phrase => lowerText.includes(phrase));
-        const hasSymptomDescription = symptomDescriptions.some(phrase => lowerText.includes(phrase));
-        
-        // Decisión fuerte basada en frases específicas
-        if (hasStrongDoctor) return 'medico';
-        if (hasStrongPatient) return 'paciente';
-        
-        // Decisión basada en tipo de contenido
-        if (hasMedicalQuestion && !hasSymptomDescription) return 'medico';
-        if (hasSymptomDescription && !hasMedicalQuestion) return 'paciente';
-        
-        // Análisis adicional para casos ambiguos
-        const isDescribingSymptoms = lowerText.includes('dolor') || lowerText.includes('siento') || 
-                                   lowerText.includes('noto') || lowerText.includes('tengo') ||
-                                   lowerText.includes('me duele') || lowerText.includes('sensibilidad');
-        
-        const isAskingQuestions = lowerText.includes('?') || lowerText.includes('podrías') ||
-                                lowerText.includes('puedes') || lowerText.includes('dime') ||
-                                lowerText.includes('cuéntame');
-        
-        if (isDescribingSymptoms && !isAskingQuestions) return 'paciente';
-        if (isAskingQuestions && !isDescribingSymptoms) return 'medico';
-        
-        // Contexto: si la transcripción anterior fue del médico haciendo una pregunta,
-        // es probable que esta sea la respuesta del paciente
-        if (previousTranscriptions.length > 0) {
-          const lastTranscription = previousTranscriptions[previousTranscriptions.length - 1];
-          const lastText = lastTranscription.text.toLowerCase();
-          
-          if (lastTranscription.speaker === 'medico' && 
-              (lastText.includes('?') || medicalQuestions.some(q => lastText.includes(q)))) {
-            return 'paciente'; // Respuesta a pregunta médica
-          }
-        }
-        
-        // Si no hay indicadores claros, usar el número de speaker de Deepgram
-        return speakerNumber === 0 ? 'medico' : 'paciente';
-      };
-      
-      const newTranscription: Transcription = {
-        id: Date.now().toString() + Math.random(),
-        speaker: 'paciente', // Temporal, se detectará correctamente después
-        text: transcription.transcript,
-        timestamp: new Date().toLocaleTimeString(),
-        confidence: Math.round(transcription.confidence * 100)
-      };
-      
-      setTranscriptions(prev => {
-        // Crear la transcripción con detección de speaker mejorada
-        const improvedTranscription = {
-          ...newTranscription,
-          speaker: detectSpeaker(transcription.transcript, transcription.speaker || 0, prev)
+      // Solo mostrar transcripciones finales para evitar spam
+      if (transcription.is_final && transcription.transcript.trim()) {
+        const newTranscription: Transcription = {
+          id: Date.now().toString() + Math.random(),
+          speaker: transcription.speaker === 0 ? 'medico' : 
+                  transcription.speaker === 1 ? 'paciente' : 'unknown',
+          text: transcription.transcript,
+          timestamp: new Date().toLocaleTimeString(),
+          confidence: Math.round(transcription.confidence * 100)
         };
         
-        // DEDUPLICACIÓN MÁS ESTRICTA
-        const isDuplicate = prev.some(t => {
-          const textMatch = t.text.trim().toLowerCase() === improvedTranscription.text.trim().toLowerCase();
-          const timeMatch = Math.abs(Date.now() - parseInt(t.id)) < 5000; // 5 segundos
-          const speakerMatch = t.speaker === improvedTranscription.speaker;
-          
-          return textMatch && timeMatch && speakerMatch;
+        setTranscriptions(prev => {
+          const updated = [...prev, newTranscription];
+          console.log('📝 Actualizando transcripciones. Total:', updated.length);
+          // Mantener solo las últimas 20 transcripciones
+          return updated.slice(-20);
         });
         
-        if (isDuplicate) {
-          return prev;
-        }
-        
-        // Verificar si hay demasiadas transcripciones en poco tiempo (posible spam)
-        const recentTranscriptions = prev.filter(t => 
-          Math.abs(Date.now() - parseInt(t.id)) < 2000 // Últimos 2 segundos
-        );
-        
-        if (recentTranscriptions.length >= 3) {
-          return prev;
-        }
-        
-        const updated = [...prev, improvedTranscription];
-        // Mantener solo las últimas 20 transcripciones
-        return updated.slice(-20);
-      });
+        console.log('📝 Nueva transcripción agregada:', newTranscription);
+      } else {
+        console.log('⏭️ Transcripción ignorada (no final o vacía)');
+      }
     });
 
     return () => {
@@ -227,48 +111,6 @@ const MedicalDashboard: React.FC = () => {
       transcriptionRef.current.scrollTop = transcriptionRef.current.scrollHeight;
     }
   }, [transcriptions]);
-
-  // Función de prueba DESHABILITADA - No mezclar con transcripciones reales
-  const testTranscription = () => {
-    console.warn('⚠️ ADVERTENCIA: El botón de prueba está deshabilitado para evitar contaminar las transcripciones reales.');
-    console.warn('⚠️ Si necesitas probar, usa el micrófono real o comenta esta advertencia.');
-    // DESHABILITADO: No agregar transcripciones mockeadas cuando hay transcripciones reales
-    /*
-    console.log('🧪 MedicalDashboard: Simulando transcripción de prueba...');
-    
-    const sampleTexts = [
-      "Buenos días doctor, me duele mucho la cabeza desde ayer",
-      "¿Desde cuándo tiene este dolor? ¿Es constante o intermitente?",
-      "Es constante, y también tengo un poco de fiebre",
-      "Entiendo. ¿Ha tomado algún medicamento para el dolor?",
-      "Solo paracetamol, pero no me ha hecho mucho efecto",
-      "Vamos a hacer un examen físico para evaluar mejor su condición"
-    ];
-    
-    const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
-    const testData = {
-      is_final: true,
-      transcript: randomText,
-      speaker: Math.random() > 0.5 ? 0 : 1,
-      confidence: 0.85 + Math.random() * 0.15 // Entre 85% y 100%
-    };
-    
-    // Simular evento de transcripción
-    const newTranscription: Transcription = {
-      id: Date.now().toString() + Math.random(),
-      speaker: testData.speaker === 0 ? 'medico' : 'paciente',
-      text: testData.transcript,
-      timestamp: new Date().toLocaleTimeString(),
-      confidence: Math.round(testData.confidence * 100)
-    };
-    
-    setTranscriptions(prev => {
-      const updated = [...prev, newTranscription];
-      console.log('🧪 MedicalDashboard: Transcripción de prueba agregada. Total:', updated.length);
-      return updated.slice(-20);
-    });
-    */
-  };
 
   const startSession = async () => {
     try {
@@ -679,103 +521,6 @@ const MedicalDashboard: React.FC = () => {
             </button>
           )}
 
-          {/* Botones Debug */}
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={async () => {
-                console.log('🔍 DEBUG: Verificando servicios...');
-                try {
-                  const response = await fetch('/api/debug-services');
-                  const data = await response.json();
-                  console.log('🔍 DEBUG SERVICIOS:', data);
-                  alert(`Servicios: ${data.debug?.hasOpenaiService ? 'OpenAI ✅' : 'OpenAI ❌'}`);
-                } catch (error) {
-                  console.error('❌ DEBUG: Error verificando servicios:', error);
-                }
-              }}
-              style={{
-                padding: '8px 16px',
-                background: '#f59e0b',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                cursor: 'pointer',
-                fontWeight: '500'
-              }}
-            >
-              🔍 Debug Servicios
-            </button>
-            
-            <button
-              onClick={async () => {
-                console.log('🔧 DEBUG: Forzando inicialización de OpenAI...');
-                try {
-                  const response = await fetch('/api/force-init-openai', {
-                    method: 'POST'
-                  });
-                  const data = await response.json();
-                  console.log('🔧 DEBUG INIT:', data);
-                  alert(`Inicialización: ${data.status === 'success' ? 'OpenAI ✅' : 'Error ❌'}`);
-                } catch (error) {
-                  console.error('❌ DEBUG: Error forzando inicialización:', error);
-                  alert('Error forzando inicialización');
-                }
-              }}
-              style={{
-                padding: '8px 16px',
-                background: '#10b981',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                cursor: 'pointer',
-                fontWeight: '500'
-              }}
-            >
-              🔧 Forzar Init
-            </button>
-            
-            {transcriptions.length >= 2 && (
-              <button
-                onClick={async () => {
-                  console.log('🧪 DEBUG: Forzando análisis médico...');
-                  try {
-                    const response = await fetch('/api/medical-analysis', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    console.log('🧪 DEBUG: Respuesta del análisis:', data);
-                    
-                    if (data.status === 'success' && data.analysis) {
-                      setCurrentAnalysis(data.analysis);
-                      console.log('✅ DEBUG: Análisis forzado aplicado');
-                    } else {
-                      console.warn('⚠️ DEBUG: No se pudo generar análisis:', data.message);
-                    }
-                  } catch (error) {
-                    console.error('❌ DEBUG: Error forzando análisis:', error);
-                  }
-                }}
-                style={{
-                  padding: '8px 16px',
-                  background: '#7c3aed',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#6d28d9'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#7c3aed'}
-              >
-                🧪 Forzar Análisis
-              </button>
-            )}
-          </div>
-
           <div style={{ marginLeft: 'auto', fontSize: '14px', color: '#6b7280' }}>
             Transcripciones: {transcriptions.length}
           </div>
@@ -800,122 +545,17 @@ const MedicalDashboard: React.FC = () => {
           boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
           minHeight: '500px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ 
-              margin: 0, 
-              fontSize: '20px', 
-              fontWeight: '600',
-              color: '#374151',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              Transcripción en Tiempo Real
-              {isRecording && (
-                <span style={{
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                  color: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  animation: 'pulse 2s infinite'
-                }}>
-                  🔴 EN VIVO
-                </span>
-              )}
-            </h2>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {transcriptions.length > 0 && (
-                <>
-                  <button
-                    onClick={() => {
-                      // Auto-corregir speakers basándose en contenido
-                      setTranscriptions(prev => prev.map(t => {
-                        const text = t.text.toLowerCase();
-                        
-                        // Frases claramente del médico
-                        const doctorPhrases = ['mi nombre es', 'cuáles son los síntomas', 'podrías describir', 'desde cuándo'];
-                        // Frases claramente del paciente  
-                        const patientPhrases = ['me duele', 'siento', 'he notado', 'también noto', 'el dolor se siente'];
-                        
-                        const isDoctor = doctorPhrases.some(phrase => text.includes(phrase)) ||
-                                       (text.includes('?') && (text.includes('cómo') || text.includes('qué') || text.includes('dónde')));
-                        
-                        const isPatient = patientPhrases.some(phrase => text.includes(phrase)) ||
-                                        text.includes('dolor') || text.includes('sensibilidad');
-                        
-                        if (isDoctor && !isPatient) {
-                          return { ...t, speaker: 'medico' };
-                        } else if (isPatient && !isDoctor) {
-                          return { ...t, speaker: 'paciente' };
-                        }
-                        return t;
-                      }));
-                      console.log('🔄 Speakers auto-corregidos');
-                    }}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      fontWeight: '500'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#2563eb'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = '#3b82f6'}
-                  >
-                    🔄 Auto-Corregir
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      if (confirm('¿Seguro que quieres limpiar todas las transcripciones?')) {
-                        setTranscriptions([]);
-                        console.log('🗑️ Transcripciones limpiadas');
-                      }
-                    }}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      fontWeight: '500'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#dc2626'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = '#ef4444'}
-                  >
-                    🗑️ Limpiar
-                  </button>
-                </>
-              )}
-              {!isRecording && (
-                <button
-                  onClick={testTranscription}
-                  disabled={true}
-                  style={{
-                    padding: '8px 16px',
-                    background: '#9ca3af',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    cursor: 'not-allowed',
-                    fontWeight: '500',
-                    opacity: 0.5
-                  }}
-                  title="Botón de prueba deshabilitado para evitar mezclar datos mockeados con reales"
-                >
-                  🧪 Prueba (Deshabilitado)
-                </button>
-              )}
-            </div>
-          </div>
+          <h2 style={{ 
+            margin: '0 0 20px 0', 
+            fontSize: '20px', 
+            fontWeight: '600',
+            color: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            Transcripción en Tiempo Real
+          </h2>
           
           <div 
             ref={transcriptionRef}
@@ -935,30 +575,7 @@ const MedicalDashboard: React.FC = () => {
                 marginTop: '120px',
                 fontSize: '14px'
               }}>
-                <div style={{ marginBottom: '16px' }}>
-                  {isRecording ? (
-                    <div>
-                      <div style={{ fontSize: '16px', marginBottom: '8px' }}>
-                        🎤 Escuchando audio en tiempo real...
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#10b981' }}>
-                        ✅ Solo transcripciones REALES de Deepgram
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      Las transcripciones aparecerán aquí en tiempo real
-                      <div style={{ fontSize: '12px', marginTop: '8px', color: '#ef4444' }}>
-                        🚫 Transcripciones mockeadas BLOQUEADAS
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                  Estado: {transcriptions.length} transcripciones | 
-                  Conectado: {isConnected ? '✅ Sí' : '❌ No'} | 
-                  Grabando: {isRecording ? '🔴 Sí' : '⏸️ No'}
-                </div>
+                Las transcripciones aparecerán aquí en tiempo real
               </div>
             ) : (
               transcriptions.map((transcription) => (
@@ -978,46 +595,13 @@ const MedicalDashboard: React.FC = () => {
                     alignItems: 'center',
                     marginBottom: '6px'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ 
-                        fontWeight: '600',
-                        color: transcription.speaker === 'medico' ? '#1d4ed8' : '#059669',
-                        fontSize: '14px'
-                      }}>
-                        {transcription.speaker === 'medico' ? 'Médico' : 'Paciente'}
-                      </span>
-                      <span style={{
-                        fontSize: '10px',
-                        fontWeight: '600',
-                        background: '#10b981',
-                        color: 'white',
-                        padding: '2px 6px',
-                        borderRadius: '4px'
-                      }}>
-                        REAL
-                      </span>
-                      <button
-                        onClick={() => {
-                          setTranscriptions(prev => prev.map(t => 
-                            t.id === transcription.id 
-                              ? { ...t, speaker: t.speaker === 'medico' ? 'paciente' : 'medico' }
-                              : t
-                          ));
-                        }}
-                        style={{
-                          fontSize: '10px',
-                          background: '#6b7280',
-                          color: 'white',
-                          border: 'none',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                        title="Cambiar speaker"
-                      >
-                        ↔️
-                      </button>
-                    </div>
+                    <span style={{ 
+                      fontWeight: '600',
+                      color: transcription.speaker === 'medico' ? '#1d4ed8' : '#059669',
+                      fontSize: '14px'
+                    }}>
+                      {transcription.speaker === 'medico' ? 'Médico' : 'Paciente'}
+                    </span>
                     <span style={{ 
                       fontSize: '12px', 
                       color: '#6b7280' 
@@ -1367,9 +951,8 @@ const MedicalDashboard: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
 
-    {/* Modal del Informe Final */}
+      {/* Modal del Informe Final */}
       {showFinalReport && finalReport && (
         <div style={{
           position: 'fixed',

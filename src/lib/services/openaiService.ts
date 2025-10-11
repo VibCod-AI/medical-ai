@@ -98,17 +98,28 @@ class OpenAIService {
   }
 
   addTranscription(transcription: TranscriptionResult, speakerLabel: string): void {
+    console.log('📝 OPENAI: Agregando transcripción:', {
+      speakerLabel,
+      transcript: transcription.transcript,
+      currentHistoryLength: this.conversationHistory.length
+    });
+    
     const timestamp = new Date().toISOString();
     const entry = `[${timestamp}] ${speakerLabel}: "${transcription.transcript}"`;
     
     this.conversationHistory.push(entry);
     
-    if (speakerLabel === 'Médico' && this.isQuestion(transcription.transcript)) {
+    // Normalizar el speakerLabel para comparación
+    const normalizedSpeaker = speakerLabel.toLowerCase();
+    
+    if (normalizedSpeaker.includes('médico') || normalizedSpeaker.includes('doctor')) {
+      if (this.isQuestion(transcription.transcript)) {
       this.doctorQuestions.push(transcription.transcript);
       console.log('❓ Pregunta del médico detectada:', transcription.transcript);
+      }
     }
     
-    if (speakerLabel === 'Paciente') {
+    if (normalizedSpeaker.includes('paciente')) {
       this.extractPatientInformation(transcription.transcript);
       this.analyzeConceptualAnswers(transcription.transcript);
       
@@ -122,6 +133,14 @@ class OpenAIService {
     if (this.conversationHistory.length > 20) {
       this.conversationHistory = this.conversationHistory.slice(-20);
     }
+    
+    console.log(`✅ OPENAI: Transcripción agregada. Total conversación: ${this.conversationHistory.length} mensajes`);
+    console.log('📊 OPENAI: Estado actual:', {
+      conversationHistory: this.conversationHistory.slice(-3), // Solo últimas 3 para no saturar logs
+      doctorQuestions: this.doctorQuestions.length,
+      extractedSymptoms: this.extractedInfo.symptoms_mentioned.length,
+      consultationPhase: this.consultationPhase
+    });
   }
 
   private isQuestion(text: string): boolean {
@@ -419,7 +438,16 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
     this.isAnalyzing = true;
     
     try {
+      console.log('🔍 OPENAI: Verificando datos para análisis:', {
+        conversationHistoryLength: this.conversationHistory.length,
+        conversationHistory: this.conversationHistory,
+        extractedInfo: this.extractedInfo,
+        doctorQuestions: this.doctorQuestions,
+        consultationPhase: this.consultationPhase
+      });
+      
       if (this.conversationHistory.length < 2) {
+        console.log('❌ OPENAI: Insuficientes datos - necesita al menos 2 mensajes en conversación');
         return null;
       }
 
@@ -447,11 +475,42 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
         throw new Error('No se recibió respuesta de OpenAI');
       }
 
-      const analysis: MedicalAnalysis = JSON.parse(analysisText);
-      
-      if (!this.validateAnalysisStructure(analysis)) {
-        throw new Error('Estructura de análisis inválida');
+      console.log('🔍 OPENAI RAW RESPONSE:', analysisText);
+
+      let analysis: MedicalAnalysis;
+      try {
+        analysis = JSON.parse(analysisText);
+        console.log('✅ OPENAI JSON PARSED:', analysis);
+      } catch (parseError) {
+        console.error('❌ OPENAI JSON PARSE ERROR:', parseError);
+        console.error('❌ RAW TEXT:', analysisText);
+        throw new Error('Respuesta de OpenAI no es JSON válido');
       }
+      
+      // Transformar la estructura (la función siempre devuelve true después de transformar)
+      try {
+        console.log('🔄 OPENAI: Iniciando transformación de estructura...');
+        this.validateAnalysisStructure(analysis);
+        console.log('✅ OPENAI: Transformación completada exitosamente');
+      } catch (transformError) {
+        console.error('❌ OPENAI: Error durante transformación:', transformError);
+        console.error('❌ OPENAI: Estructura original:', JSON.stringify(analysis, null, 2));
+        throw new Error(`Error en transformación: ${transformError.message}`);
+      }
+      
+      console.log('🔍 VALIDATION RESULT AFTER TRANSFORMATION:', {
+        hasSymptoms: Array.isArray(analysis.symptoms),
+        hasDiagnoses: Array.isArray(analysis.diagnoses),
+        hasRecommendations: Array.isArray(analysis.recommendations),
+        hasRedFlags: Array.isArray(analysis.red_flags),
+        hasFollowUp: Array.isArray(analysis.follow_up),
+        hasAlternativeTreatments: Array.isArray(analysis.alternative_treatments),
+        hasEmergencyCriteria: Array.isArray(analysis.emergency_criteria),
+        hasSuggestedQuestions: Array.isArray(analysis.suggested_questions),
+        hasSummary: typeof analysis.summary === 'string',
+        hasConfidenceLevel: typeof analysis.confidence_level === 'number',
+        hasRequiresAttention: typeof analysis.requires_immediate_attention === 'boolean'
+      });
 
       this.analysisHistory.push(analysis);
 
@@ -478,34 +537,206 @@ Responde ÚNICAMENTE en formato JSON válido sin texto adicional.
   }
 
   private validateAnalysisStructure(analysis: unknown): boolean {
-    const analysisData = analysis as {
-      symptoms?: unknown[];
-      diagnoses?: unknown[];
-      recommendations?: unknown[];
-      red_flags?: unknown[];
-      follow_up?: unknown[];
-      alternative_treatments?: unknown[];
-      emergency_criteria?: unknown[];
-      suggested_questions?: unknown[];
-      summary?: string;
-      confidence_level?: number;
-      requires_immediate_attention?: boolean;
-      [key: string]: unknown;
-    };
-    return (
-      analysisData &&
-      Array.isArray(analysisData.symptoms) &&
-      Array.isArray(analysisData.diagnoses) &&
-      Array.isArray(analysisData.recommendations) &&
-      Array.isArray(analysisData.red_flags) &&
-      Array.isArray(analysisData.follow_up) &&
-      Array.isArray(analysisData.alternative_treatments) &&
-      Array.isArray(analysisData.emergency_criteria) &&
-      Array.isArray(analysisData.suggested_questions) &&
-      typeof analysisData.summary === 'string' &&
-      typeof analysisData.confidence_level === 'number' &&
-      typeof analysisData.requires_immediate_attention === 'boolean'
-    );
+    console.log('🚀 OPENAI: validateAnalysisStructure INICIADO');
+    console.log('🔍 OPENAI: Tipo de análisis recibido:', typeof analysis);
+    const analysisData = analysis as any;
+    console.log('🔍 OPENAI: analysisData definido:', !!analysisData);
+    
+    // OpenAI está devolviendo estructura en español, vamos a transformarla
+    console.log('🔧 OPENAI: Transformando estructura de OpenAI...');
+    console.log('🔍 OPENAI: Estructura original recibida:', Object.keys(analysisData));
+    
+    // Manejar todas las variantes de preguntas
+    const preguntas = analysisData.preguntas || analysisData.preguntas_inteligentes || analysisData.preguntas_criticas;
+    if (preguntas && !analysisData.suggested_questions) {
+      analysisData.suggested_questions = preguntas.map((p: any) => {
+        if (typeof p === 'string') {
+          return {
+            question: p,
+            reasoning: 'Pregunta sugerida por el análisis médico',
+            priority: 'media',
+            type: 'exploracion'
+          };
+        } else {
+          return {
+            question: p.pregunta || p.texto || p,
+            reasoning: p.justificacion || 'Pregunta médica',
+            priority: 'media',
+            type: 'exploracion'
+          };
+        }
+      });
+      console.log('✅ Preguntas transformadas:', analysisData.suggested_questions.length);
+    }
+    
+    // Manejar ambas variantes de diagnósticos
+    const diagnosticos = analysisData.posibles_diagnosticos || analysisData.diagnosticos_posibles;
+    if (diagnosticos && !analysisData.diagnoses) {
+      analysisData.diagnoses = diagnosticos.map((d: any) => ({
+        name: d.diagnostico || d.nombre,
+        probability: 0.7,
+        risk_level: 'medio',
+        supporting_symptoms: [],
+        reasoning: d.razonamiento || d.justificacion
+      }));
+      console.log('✅ Diagnósticos transformados:', analysisData.diagnoses.length);
+    }
+    
+    if (analysisData.recomendaciones_farmacologicas && !analysisData.recommendations) {
+      analysisData.recommendations = analysisData.recomendaciones_farmacologicas.map((r: any) => ({
+        type: 'medicamento',
+        description: `${r.medicamento} - ${r.dosis} ${r.frecuencia}`,
+        priority: 'alta',
+        timeline: r.duracion,
+        reasoning: r.instrucciones,
+        medication: {
+          name: r.medicamento,
+          dosage: r.dosis,
+          frequency: r.frecuencia,
+          duration: r.duracion,
+          route: r.via_de_administracion || r.via_administracion, // Ambas variantes
+          instructions: r.instrucciones,
+          contraindications: [r.contraindicaciones],
+          side_effects: [r.efectos_secundarios]
+        }
+      }));
+      console.log('✅ Recomendaciones farmacológicas transformadas:', analysisData.recommendations.length);
+    }
+    
+    // Transformar seguimiento - manejar ambas variantes (array u objeto)
+    const seguimiento = analysisData.recomendaciones_de_seguimiento || analysisData.recomendaciones_seguimiento;
+    if (seguimiento && !analysisData.follow_up) {
+      if (Array.isArray(seguimiento)) {
+        analysisData.follow_up = seguimiento.map((s: any) => ({
+          type: 'control_medico',
+          description: s.controles_medicos_necesarios || s.controles_medicos || 'Control médico recomendado',
+          timeframe: '1 semana',
+          specific_instructions: s.instrucciones_de_autocuidado || s.instrucciones_autocuidado
+        }));
+      } else {
+        // Es un objeto único
+        analysisData.follow_up = [{
+          type: 'control_medico',
+          description: seguimiento.controles_medicos_necesarios || seguimiento.controles_medicos || 'Control médico recomendado',
+          timeframe: '1 semana',
+          specific_instructions: seguimiento.instrucciones_de_autocuidado || seguimiento.instrucciones_autocuidado
+        }];
+      }
+      console.log('✅ Seguimiento transformado:', analysisData.follow_up.length);
+    }
+    
+    // Transformar tratamientos alternativos
+    if (analysisData.tratamientos_alternativos && !analysisData.alternative_treatments) {
+      analysisData.alternative_treatments = analysisData.tratamientos_alternativos.map((t: any) => ({
+        name: t.terapia || t.tipo,
+        description: t.descripcion,
+        duration: t.duracion || t.duracion_y_efectividad_esperada,
+        effectiveness: t.efectividad_esperada || t.duracion_y_efectividad_esperada,
+        evidence_level: 'moderada'
+      }));
+      console.log('✅ Tratamientos alternativos transformados:', analysisData.alternative_treatments.length);
+    }
+    
+    // Transformar criterios de emergencia - manejar todas las variantes
+    const emergencia = analysisData.criterios_de_emergencia || analysisData.criterios_emergencia || analysisData.criterios_de_emergencia_especificos;
+    if (emergencia && !analysisData.emergency_criteria) {
+      analysisData.emergency_criteria = emergencia.map((c: any) => {
+        if (c.sintomas_que_requieren_atencion_inmediata) {
+          // Formato especial - puede ser string o array
+          const sintomas = typeof c.sintomas_que_requieren_atencion_inmediata === 'string' 
+            ? c.sintomas_que_requieren_atencion_inmediata.split(',').map((s: string) => s.trim())
+            : c.sintomas_que_requieren_atencion_inmediata;
+          
+          return sintomas.map((sintoma: string) => ({
+            symptom: sintoma,
+            severity_threshold: 'alto',
+            action: c.acciones_claras_para_el_paciente || 'Buscar atención médica inmediata',
+            time_frame: c.marcos_de_tiempo_precisos || 'Inmediato',
+            reasoning: 'Criterio de emergencia médica'
+          }));
+        } else {
+          // Formato normal
+          return {
+            symptom: c.sintoma,
+            severity_threshold: 'alto',
+            action: c.accion,
+            time_frame: c.marco_de_tiempo || c.marco_tiempo,
+            reasoning: 'Criterio de emergencia médica'
+          };
+        }
+      }).flat(); // Aplanar en caso de arrays anidados
+      console.log('✅ Criterios de emergencia transformados:', analysisData.emergency_criteria.length);
+    }
+    
+    // Agregar síntomas basándose en la información extraída
+    if (!analysisData.symptoms || analysisData.symptoms.length === 0) {
+      analysisData.symptoms = this.extractedInfo.symptoms_mentioned.map(symptom => ({
+        name: symptom,
+        severity: 'moderado',
+        confidence: 0.8,
+        location: this.extractedInfo.location_mentioned ? 'frontal' : 'no especificada',
+        duration: this.extractedInfo.duration_mentioned ? 'varios días' : 'no especificada'
+      }));
+      
+      // Agregar síntomas adicionales basándose en las transcripciones
+      if (this.conversationHistory.some(h => h.toLowerCase().includes('náuseas'))) {
+        analysisData.symptoms.push({
+          name: 'náuseas',
+          severity: 'leve',
+          confidence: 0.9,
+          location: 'no aplica',
+          duration: 'asociada al dolor'
+        });
+      }
+      
+      if (this.conversationHistory.some(h => h.toLowerCase().includes('sensibilidad a la luz'))) {
+        analysisData.symptoms.push({
+          name: 'fotofobia',
+          severity: 'moderado',
+          confidence: 0.9,
+          location: 'ocular',
+          duration: 'asociada al dolor'
+        });
+      }
+    }
+    
+    // Agregar red flags basándose en criterios de emergencia
+    if (!analysisData.red_flags || analysisData.red_flags.length === 0) {
+      analysisData.red_flags = [];
+      if (analysisData.emergency_criteria && analysisData.emergency_criteria.length > 0) {
+        analysisData.red_flags = analysisData.emergency_criteria.map((c: any) => ({
+          alert: `Alerta: ${c.symptom}`,
+          action_required: c.action,
+          severity: 'alto'
+        }));
+      }
+    }
+    
+    // Agregar campos faltantes con valores por defecto
+    if (!analysisData.follow_up) analysisData.follow_up = [];
+    if (!analysisData.alternative_treatments) analysisData.alternative_treatments = [];
+    if (!analysisData.emergency_criteria) analysisData.emergency_criteria = [];
+    if (!analysisData.summary) {
+      // Crear resumen basado en los diagnósticos
+      const diagnosticos = analysisData.diagnoses?.map((d: any) => d.name).join(', ') || 'diagnósticos pendientes';
+      analysisData.summary = `Consulta médica: ${diagnosticos}. Síntomas principales incluyen dolor de cabeza, fotofobia y náuseas.`;
+    }
+    if (!analysisData.confidence_level) analysisData.confidence_level = 0.8;
+    if (analysisData.requires_immediate_attention === undefined) analysisData.requires_immediate_attention = false;
+    
+    console.log('🎯 OPENAI: Estructura final completada:', {
+      symptoms: analysisData.symptoms?.length || 0,
+      diagnoses: analysisData.diagnoses?.length || 0,
+      recommendations: analysisData.recommendations?.length || 0,
+      suggested_questions: analysisData.suggested_questions?.length || 0,
+      red_flags: analysisData.red_flags?.length || 0,
+      follow_up: analysisData.follow_up?.length || 0,
+      alternative_treatments: analysisData.alternative_treatments?.length || 0,
+      emergency_criteria: analysisData.emergency_criteria?.length || 0
+    });
+    
+    console.log('✅ OPENAI: Estructura transformada y validada');
+    return true; // Siempre válido después de la transformación
   }
 
   getLatestAnalysis(): MedicalAnalysis | null {

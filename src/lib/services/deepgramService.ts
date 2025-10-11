@@ -46,19 +46,42 @@ class DeepgramService {
       language: 'es',
       smart_format: true,
       punctuate: true,
-      diarize: true,
+      diarize: true, // ✅ HABILITADO para detectar múltiples speakers
+      diarize_version: '2023-10-12', // Versión específica de diarización
+      multichannel: false,
+      alternatives: 1,
+      numerals: true,
+      search: [],
+      replace: [],
+      keywords: [],
+      keyword_boost: 'legacy',
       interim_results: true,
-      endpointing: 500,
-      vad_events: false,
+      endpointing: 300,
+      vad_events: true,
       sample_rate: 16000,
       channels: 1,
       encoding: 'linear16',
       filler_words: false,
-      profanity_filter: false
+      profanity_filter: false,
+      utterances: true,
+      utt_split: 0.8
     };
 
+    // Verificar API key
+    const apiKey = process.env.DEEPGRAM_API_KEY;
+    console.log('🔑 DEEPGRAM: Verificando API Key:', {
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey?.length || 0,
+      apiKeyPrefix: apiKey?.substring(0, 8) || 'undefined'
+    });
+
+    if (!apiKey) {
+      console.error('❌ DEEPGRAM: API Key no encontrada en variables de entorno!');
+      console.error('💡 DEEPGRAM: Asegúrate de tener DEEPGRAM_API_KEY en tu archivo .env.local');
+    }
+
     // Inicializar cliente Deepgram
-    this.deepgram = createClient(process.env.DEEPGRAM_API_KEY) as DeepgramClient;
+    this.deepgram = createClient(apiKey) as DeepgramClient;
   }
 
   async connect(): Promise<boolean> {
@@ -74,12 +97,18 @@ class DeepgramService {
         vad_events: this.config.vad_events,
         sample_rate: this.config.sample_rate,
         channels: this.config.channels,
+        filler_words: this.config.filler_words,
+        utterances: this.config.utterances,
+        utt_split: this.config.utt_split,
         ...(this.config.encoding && { encoding: this.config.encoding })
       };
+      
+      console.log('🔧 DEEPGRAM: Configuración de conexión:', connectionConfig);
       
       this.connection = this.deepgram.listen.live(connectionConfig);
 
       this.connection.on(LiveTranscriptionEvents.Open, () => {
+        console.log('✅ DEEPGRAM: Conexión abierta exitosamente');
         this.isConnected = true;
         this.startKeepAlive();
       });
@@ -89,11 +118,18 @@ class DeepgramService {
       });
 
       this.connection.on(LiveTranscriptionEvents.Error, (error: unknown) => {
-        console.error('❌ Error Deepgram:', error);
+        console.error('❌ DEEPGRAM: Error en conexión:', error);
         this.isConnected = false;
       });
 
-      this.connection.on(LiveTranscriptionEvents.Metadata, () => {
+      this.connection.on(LiveTranscriptionEvents.Metadata, (metadata: unknown) => {
+        console.log('📊 DEEPGRAM: Metadata recibida:', metadata);
+        this.isConnected = false;
+        this.stopKeepAlive();
+      });
+
+      this.connection.on(LiveTranscriptionEvents.Close, (event: unknown) => {
+        console.log('🔒 DEEPGRAM: Conexión cerrada:', event);
         this.isConnected = false;
         this.stopKeepAlive();
       });
@@ -167,14 +203,39 @@ class DeepgramService {
   }
 
   private handleTranscription(data: unknown) {
+    console.log('🎧 DEEPGRAM: handleTranscription llamado con data:', {
+      hasData: !!data,
+      dataType: typeof data,
+      dataKeys: data ? Object.keys(data as object) : []
+    });
+
     const transcriptionData = data as DeepgramTranscriptionData;
+    console.log('🎧 DEEPGRAM: transcriptionData procesado:', {
+      hasChannel: !!transcriptionData.channel,
+      hasAlternatives: !!transcriptionData.channel?.alternatives,
+      alternativesLength: transcriptionData.channel?.alternatives?.length || 0,
+      hasFirstAlternative: !!transcriptionData.channel?.alternatives?.[0],
+      is_final: transcriptionData.is_final
+    });
+
     if (!transcriptionData.channel?.alternatives?.[0]) {
+      console.log('⏭️ DEEPGRAM: Datos de transcripción inválidos, saltando...');
       return;
     }
 
     const result = transcriptionData.channel.alternatives[0];
     const firstWord = result.words?.[0];
     const speakerNumber = firstWord?.speaker;
+    
+    console.log('🔍 DEEPGRAM: Detalles del resultado:', {
+      transcript: result.transcript,
+      confidence: result.confidence,
+      wordsCount: result.words?.length || 0,
+      firstWord: firstWord?.word,
+      speakerNumber: speakerNumber,
+      hasTranscript: !!result.transcript,
+      transcriptTrimmed: result.transcript?.trim()
+    });
     
     const transcriptionResult: TranscriptionResult = {
       transcript: result.transcript || '',
@@ -211,6 +272,12 @@ class DeepgramService {
       console.log(`   🎯 Confianza: ${Math.round(transcriptionResult.confidence * 100)}%`);
     }
 
+    console.log('🚀 DEEPGRAM: Llamando callback onTranscriptionReceived:', {
+      hasCallback: !!this.onTranscriptionReceived,
+      transcriptLength: transcriptionResult.transcript.length,
+      is_final: transcriptionResult.is_final
+    });
+    
     this.onTranscriptionReceived?.(transcriptionResult);
   }
 
@@ -241,3 +308,4 @@ class DeepgramService {
 }
 
 export default DeepgramService;
+

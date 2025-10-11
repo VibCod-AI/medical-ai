@@ -20,12 +20,50 @@ let io: Server | null = null;
 // Inicializar servicios
 const initServices = () => {
   try {
+    // Verificar variables de entorno críticas
+    console.log('🔍 SERVER: Verificando variables de entorno:', {
+      hasDeepgramKey: !!process.env.DEEPGRAM_API_KEY,
+      deepgramKeyLength: process.env.DEEPGRAM_API_KEY?.length || 0,
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+      openaiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+      nodeEnv: process.env.NODE_ENV,
+      wsUrl: process.env.NEXT_PUBLIC_WS_URL
+    });
+
+    if (!process.env.DEEPGRAM_API_KEY) {
+      console.error('❌ SERVER: DEEPGRAM_API_KEY no encontrada!');
+      console.error('💡 SERVER: Verifica que el archivo .env.local existe y contiene DEEPGRAM_API_KEY');
+    }
+
+    console.log('🔧 SERVER: Creando instancia de Deepgram...');
     deepgramService = new DeepgramService();
-    openaiService = new OpenAIService();
+    console.log('✅ SERVER: Deepgram creado:', !!deepgramService);
+    
+    console.log('🔧 SERVER: Creando instancia de OpenAI...');
+    try {
+      openaiService = new OpenAIService();
+      console.log('✅ SERVER: OpenAI creado:', !!openaiService);
+      
+      // Exponer la instancia globalmente para que los endpoints API puedan accederla
+      (global as any).openaiService = openaiService;
+      console.log('🌍 SERVER: Instancia OpenAI expuesta globalmente:', !!openaiService);
+      
+    } catch (error) {
+      console.error('❌ SERVER: Error creando OpenAI service:', error);
+      openaiService = null;
+    }
     
     // Configurar callback de Deepgram
     deepgramService.onTranscriptionReceived = async (transcriptionResult) => {
-      console.log('📝 Transcripción recibida:', transcriptionResult.transcript);
+      console.log('📝 SERVER: Transcripción recibida de Deepgram:', {
+        transcript: transcriptionResult.transcript,
+        is_final: transcriptionResult.is_final,
+        speaker: transcriptionResult.speaker,
+        confidence: transcriptionResult.confidence,
+        transcript_length: transcriptionResult.transcript?.length || 0,
+        has_io: !!io,
+        connected_clients: io?.engine?.clientsCount || 0
+      });
       
       if (transcriptionResult.transcript.trim()) {
         const transcriptionData = {
@@ -35,27 +73,65 @@ const initServices = () => {
           confidence: transcriptionResult.confidence
         };
         
+        console.log('🚀 SERVER: Enviando transcription-update a clientes:', transcriptionData);
+        
         // Enviar transcripción a todos los clientes
         if (io) {
           io.emit('transcription-update', transcriptionData);
+          console.log('✅ SERVER: Evento transcription-update emitido');
+        } else {
+          console.error('❌ SERVER: io no disponible, no se puede enviar transcripción');
         }
         
         if (transcriptionResult.is_final && transcriptionResult.transcript.trim()) {
-          let speakerLabel = 'Sin identificar';
-          const speakerMap: {[key: number]: string} = {
-            0: 'Médico',
-            1: 'Paciente', 
-            2: 'Hablante 3',
-            3: 'Hablante 4'
-          };
+          console.log('🔄 SERVER: Procesando transcripción final para análisis médico...');
           
-          if (typeof transcriptionResult.speaker === 'number') {
+          // Detectar speaker basándose en contenido (ya que Deepgram no está enviando speaker info)
+          let speakerLabel = 'Paciente'; // Default
+          const text = transcriptionResult.transcript.toLowerCase();
+          
+          // Frases típicas del médico
+          const doctorPhrases = [
+            'cuáles son los síntomas', 'desde cuándo', 'podrías describir', 'cómo se siente',
+            'qué tipo de dolor', 'se acompaña', 'has notado', 'tienes algún', 'mi nombre es',
+            'acompañando en tu consulta', 'vamos a revisar'
+          ];
+          
+          // Frases típicas del paciente  
+          const patientPhrases = [
+            'me duele', 'siento', 'tengo dolor', 'he estado', 'vengo porque', 'he notado',
+            'se siente como', 'es una presión', 'dolor constante', 'hola doctor'
+          ];
+          
+          const hasDoctorPhrase = doctorPhrases.some(phrase => text.includes(phrase));
+          const hasPatientPhrase = patientPhrases.some(phrase => text.includes(phrase));
+          
+          if (hasDoctorPhrase && !hasPatientPhrase) {
+            speakerLabel = 'Médico';
+          } else if (hasPatientPhrase && !hasDoctorPhrase) {
+            speakerLabel = 'Paciente';
+          } else if (typeof transcriptionResult.speaker === 'number') {
+            // Fallback a Deepgram si está disponible
+            const speakerMap: {[key: number]: string} = {
+              0: 'Médico',
+              1: 'Paciente', 
+              2: 'Hablante 3',
+              3: 'Hablante 4'
+            };
             speakerLabel = speakerMap[transcriptionResult.speaker] || `Hablante ${transcriptionResult.speaker}`;
           }
+          
+          console.log('🧠 SERVER: Enviando a OpenAI para análisis:', {
+            texto: transcriptionResult.transcript.substring(0, 50) + '...',
+            speaker: speakerLabel,
+            openaiService: !!openaiService
+          });
           
           // Procesar transcripción final
           processTranscriptionAsync(transcriptionResult, speakerLabel);
         }
+      } else {
+        console.log('⏭️ SERVER: Transcripción ignorada (texto vacío)');
       }
     };
     
@@ -70,24 +146,40 @@ const initServices = () => {
 const processTranscriptionAsync = async (transcriptionResult: any, speakerLabel: string) => {
   try {
     if (!openaiService) {
-      console.warn('⚠️ OpenAI service no disponible');
+      console.warn('⚠️ OpenAI service no disponible para análisis médico');
       return;
     }
+    
+    console.log('📝 SERVER: Agregando transcripción al historial de OpenAI...');
     
     // Agregar transcripción al historial
     openaiService.addTranscription(transcriptionResult, speakerLabel);
     
-            // Generar análisis médico
-        const analysis = await openaiService.generateMedicalAnalysis();
-        
-        if (analysis) {
-          console.log('🧠 Análisis médico generado:', analysis.symptoms?.length || 0, 'síntomas');
-          if (io) {
-            io.emit('medical-analysis', analysis);
-          }
-        }
+    console.log('🧠 SERVER: Generando análisis médico con OpenAI...');
+    
+    // Generar análisis médico
+    const analysis = await openaiService.generateMedicalAnalysis();
+    
+    if (analysis) {
+      console.log('✅ SERVER: Análisis médico generado exitosamente:', {
+        síntomas: analysis.symptoms?.length || 0,
+        diagnósticos: analysis.diagnoses?.length || 0,
+        recomendaciones: analysis.recommendations?.length || 0,
+        confianza: Math.round((analysis.confidence_level || 0) * 100) + '%'
+      });
+      
+      if (io) {
+        console.log('🚀 SERVER: Enviando análisis médico a clientes...');
+        io.emit('medical-analysis', analysis);
+        console.log('✅ SERVER: Análisis médico enviado a', io.engine?.clientsCount || 0, 'clientes');
+      } else {
+        console.error('❌ SERVER: io no disponible, no se puede enviar análisis');
+      }
+    } else {
+      console.log('⏭️ SERVER: No se generó análisis (insuficientes datos o ya en proceso)');
+    }
   } catch (error) {
-    console.error('❌ Error procesando transcripción:', error);
+    console.error('❌ SERVER: Error procesando transcripción para análisis:', error);
   }
 };
 
@@ -109,8 +201,17 @@ app.prepare().then(() => {
   console.log('🔄 Inicializando servicios de IA...');
   const servicesReady = initServices();
   
+  console.log('🔍 SERVER: Resultado de inicialización:', {
+    servicesReady,
+    hasDeepgram: !!deepgramService,
+    hasOpenAI: !!openaiService,
+    globalOpenAI: !!(global as any).openaiService
+  });
+  
   if (!servicesReady) {
     console.warn('⚠️ Algunos servicios no se pudieron inicializar - continuando sin ellos');
+  } else {
+    console.log('✅ SERVER: Todos los servicios inicializados correctamente');
   }
 
   io.on('connection', (socket) => {
@@ -150,6 +251,13 @@ app.prepare().then(() => {
 
     socket.on('audio-chunk', (audioData) => {
       try {
+        console.log(`🎵 SERVER: Audio chunk recibido de ${socket.id}:`, {
+          hasData: !!audioData,
+          byteLength: audioData?.byteLength || 0,
+          deepgramConnected: deepgramService?.connected || false,
+          sessionManagerAvailable: !!audioSessionManager
+        });
+
         if (!audioData || audioData.byteLength === 0) {
           console.warn('⚠️ Chunk de audio vacío recibido');
           return;
@@ -159,14 +267,26 @@ app.prepare().then(() => {
         let chunk = null;
         if (audioSessionManager) {
           chunk = audioSessionManager.processAudioChunk(socket.id, audioData);
+          console.log(`📊 SERVER: Chunk procesado:`, {
+            chunkId: chunk?.id,
+            sessionId: chunk?.sessionId
+          });
         }
         
         if (deepgramService && deepgramService.connected) {
+          console.log(`🚀 SERVER: Enviando chunk a Deepgram...`);
           // Enviar audio a Deepgram
           const sent = deepgramService.sendAudioChunk(audioData);
           if (!sent) {
             console.warn('⚠️ No se pudo enviar audio a Deepgram');
+          } else {
+            console.log('✅ SERVER: Chunk enviado a Deepgram exitosamente');
           }
+          
+          // ELIMINADO: Código de simulación que estaba contaminando las transcripciones reales
+          // Las transcripciones ahora vienen únicamente de Deepgram
+        } else {
+          console.warn('⚠️ SERVER: Deepgram no conectado, chunk no enviado');
         }
       } catch (error) {
         console.error('❌ Error procesando audio chunk:', error);
